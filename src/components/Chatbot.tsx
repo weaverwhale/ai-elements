@@ -33,11 +33,32 @@ import {
   ToolOutput,
 } from '@/components/ai-elements/tool';
 import { useModels } from '@/hooks/useModels';
+import { useToolOptions } from '@/hooks/useToolOptions';
 
 export const Chatbot = () => {
   const [input, setInput] = useState('');
-  const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
   const { messages, sendMessage, status, setMessages } = useChat();
+  const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
+  const toolOptions = useToolOptions();
+
+  // Function to format tool type to display name
+  const getToolDisplayName = (toolType: string) => {
+    // Remove "tool-" prefix if it exists
+    const toolId = toolType.startsWith('tool-') ? toolType.slice(5) : toolType;
+
+    // Look up the tool name from our tool options
+    const toolInfo = toolOptions[toolId];
+    if (toolInfo && toolInfo.name) {
+      return toolInfo.name;
+    }
+
+    // Fallback: convert camelCase or kebab-case to Title Case
+    return toolId
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase())
+      .trim();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +156,11 @@ export const Chatbot = () => {
                                   toolPart.state === 'output-error'
                                 }
                               >
-                                <ToolHeader type={toolPart.type} state={toolPart.state} />
+                                <ToolHeader
+                                  type={toolPart.type}
+                                  state={toolPart.state}
+                                  displayName={getToolDisplayName(toolPart.type)}
+                                />
                                 <ToolContent>
                                   <ToolInput input={toolPart.input} />
                                   <ToolOutput
