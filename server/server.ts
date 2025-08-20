@@ -6,6 +6,7 @@ import cors from 'cors';
 import path from 'path';
 import { handleChatRequest } from '../server/api/chat';
 import { handleToolsRequest } from '../server/api/tools';
+import { handleSuggestionsRequest } from '../server/api/suggestions';
 import { Readable } from 'stream';
 import { getAvailableModelProviders } from './modelProviders';
 
@@ -71,6 +72,17 @@ app.get('/api/tools', async (_req, res) => {
   } catch (error) {
     console.error('[SERVER] Error getting tools info:', error);
     res.status(500).json({ error: 'Failed to fetch tools information' });
+  }
+});
+
+// suggestions
+app.get('/api/suggestions', async (req, res) => {
+  try {
+    console.log('[SERVER] Getting chat suggestions...');
+    await handleSuggestionsRequest(req, res);
+  } catch (error) {
+    console.error('[SERVER] Error getting suggestions:', error);
+    res.status(500).json({ error: 'Failed to fetch chat suggestions' });
   }
 });
 

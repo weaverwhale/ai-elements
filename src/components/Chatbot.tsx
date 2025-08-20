@@ -35,12 +35,15 @@ import {
 } from '@/components/ai-elements/tool';
 import { useModels } from '@/hooks/useModels';
 import { useToolOptions } from '@/hooks/useToolOptions';
+import { useSuggestions } from '@/hooks/useSuggestions';
+import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion';
 
 export const Chatbot = () => {
   const [input, setInput] = useState('');
   const { messages, sendMessage, status, setMessages } = useChat();
   const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
   const toolOptions = useToolOptions();
+  const { suggestions } = useSuggestions();
 
   // Function to format tool type to display name
   const getToolDisplayName = (toolType: string) => {
@@ -78,6 +81,17 @@ export const Chatbot = () => {
 
   const handleNewConversation = () => {
     setMessages([]);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    sendMessage(
+      { text: suggestion },
+      {
+        body: {
+          modelId: selectedModel,
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -192,6 +206,18 @@ export const Chatbot = () => {
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
+
+        {messages.length === 0 && (
+          <Suggestions>
+            {suggestions.map((suggestion) => (
+              <Suggestion
+                key={suggestion.id}
+                onClick={handleSuggestionClick}
+                suggestion={suggestion.text}
+              />
+            ))}
+          </Suggestions>
+        )}
 
         <PromptInput onSubmit={handleSubmit} className="mt-4">
           <PromptInputTextarea onChange={(e) => setInput(e.target.value)} value={input} />
