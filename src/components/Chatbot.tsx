@@ -45,18 +45,14 @@ export const Chatbot = () => {
   const toolOptions = useToolOptions();
   const { suggestions, isLoading } = useSuggestions();
 
-  // Function to format tool type to display name
   const getToolDisplayName = (toolType: string) => {
-    // Remove "tool-" prefix if it exists
     const toolId = toolType.startsWith('tool-') ? toolType.slice(5) : toolType;
 
-    // Look up the tool name from our tool options
     const toolInfo = toolOptions[toolId];
     if (toolInfo && toolInfo.name) {
       return toolInfo.name;
     }
 
-    // Fallback: convert camelCase or kebab-case to Title Case
     return toolId
       .replace(/([A-Z])/g, ' $1')
       .replace(/[-_]/g, ' ')
@@ -161,7 +157,6 @@ export const Chatbot = () => {
                             </Reasoning>
                           );
                         default:
-                          // Handle tool calls - AI SDK tool parts have types that start with "tool-"
                           if (part.type.startsWith('tool-')) {
                             const toolPart = part as ToolUIPart;
                             return (
@@ -210,8 +205,7 @@ export const Chatbot = () => {
         {messages.length === 0 && (
           <Suggestions>
             {isLoading
-              ? // Loading placeholders using real component
-                Array.from({ length: 6 }).map((_, index) => (
+              ? Array.from({ length: 6 }).map((_, index) => (
                   <Suggestion
                     key={`placeholder-${index}`}
                     suggestion=""
