@@ -68,7 +68,7 @@ export const Chatbot = () => {
         { text: input },
         {
           body: {
-            model: selectedModel,
+            modelId: selectedModel,
           },
         },
       );
