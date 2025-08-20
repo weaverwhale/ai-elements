@@ -58,6 +58,31 @@ const DEFAULT_SUGGESTIONS: SuggestionItem[] = [
     text: 'How to design RESTful APIs?',
     category: 'Programming',
   },
+  {
+    id: 'roas',
+    text: 'What is my ROAS for the past 30 days?',
+    category: 'Business',
+  },
+  {
+    id: 'business-health',
+    text: 'How is my business doing?',
+    category: 'Business',
+  },
+  {
+    id: 'marketing-strategy',
+    text: 'What is my marketing strategy?',
+    category: 'Business',
+  },
+  {
+    id: 'news-today',
+    text: 'What are the latest news today?',
+    category: 'News',
+  },
+  {
+    id: 'weather-today',
+    text: 'What is the weather today in Columbus, OH?',
+    category: 'Weather',
+  },
 ];
 
 export const handleSuggestionsRequest = async (req: Request, res: Response) => {
