@@ -150,13 +150,6 @@ export const modelProviders: ModelProvider[] = [
   //   defaultSystemPrompt,
   // },
   {
-    id: 'gemma-3-4b-it-abliterated-v2',
-    name: 'Gemma 3 4B Abliterated V2 (LMStudio)',
-    available: true,
-    model: lmstudio('gemma-3-4b-it-abliterated-v2'),
-    defaultSystemPrompt,
-  },
-  {
     id: 'qwen3-1.7b',
     name: 'Qwen 3.1 1.7B (LMStudio)',
     available: true,
@@ -168,6 +161,13 @@ export const modelProviders: ModelProvider[] = [
     name: 'Mistral Nemo Instruct (LMStudio)',
     available: true,
     model: lmstudio('mistral-nemo-instruct-2407'),
+    defaultSystemPrompt,
+  },
+  {
+    id: 'gemma-3-4b-it-abliterated-v2',
+    name: 'Gemma 3 4B Abliterated V2 (LMStudio)',
+    available: true,
+    model: lmstudio('gemma-3-4b-it-abliterated-v2'),
     defaultSystemPrompt,
   },
   {
