@@ -43,7 +43,7 @@ export const Chatbot = () => {
   const { messages, sendMessage, status, setMessages } = useChat();
   const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
   const toolOptions = useToolOptions();
-  const { suggestions } = useSuggestions();
+  const { suggestions, isLoading } = useSuggestions();
 
   // Function to format tool type to display name
   const getToolDisplayName = (toolType: string) => {
@@ -209,13 +209,24 @@ export const Chatbot = () => {
 
         {messages.length === 0 && (
           <Suggestions>
-            {suggestions.map((suggestion) => (
-              <Suggestion
-                key={suggestion.id}
-                onClick={handleSuggestionClick}
-                suggestion={suggestion.text}
-              />
-            ))}
+            {isLoading
+              ? // Loading placeholders using real component
+                Array.from({ length: 6 }).map((_, index) => (
+                  <Suggestion
+                    key={`placeholder-${index}`}
+                    suggestion=""
+                    className="animate-pulse pointer-events-none"
+                  >
+                    <div className="h-3 bg-muted-foreground/30 rounded w-40"></div>
+                  </Suggestion>
+                ))
+              : suggestions.map((suggestion) => (
+                  <Suggestion
+                    key={suggestion.id}
+                    onClick={handleSuggestionClick}
+                    suggestion={suggestion.text}
+                  />
+                ))}
           </Suggestions>
         )}
 
