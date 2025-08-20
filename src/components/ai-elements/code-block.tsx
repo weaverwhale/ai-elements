@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 // @ts-ignore
 import atomOneDark from 'react-syntax-highlighter/dist/styles/atom-one-dark';
 // @ts-ignore
 import atomOneLight from 'react-syntax-highlighter/dist/styles/atom-one-light';
+import { useTheme } from '@/components/theme-provider';
 
 type CodeBlockContextType = {
   code: string;
@@ -33,69 +34,72 @@ export const CodeBlock = ({
   className,
   children,
   ...props
-}: CodeBlockProps) => (
-  <CodeBlockContext.Provider value={{ code }}>
-    <div
-      className={cn(
-        'relative w-full overflow-hidden rounded-md border bg-background text-foreground',
-        className,
-      )}
-      {...props}
-    >
-      <div className="relative">
-        <SyntaxHighlighter
-          className="overflow-hidden dark:hidden"
-          codeTagProps={{
-            className: 'font-mono text-sm',
-          }}
-          customStyle={{
-            margin: 0,
-            padding: '1rem',
-            fontSize: '0.875rem',
-            background: 'hsl(var(--background))',
-            color: 'hsl(var(--foreground))',
-          }}
-          language={language}
-          lineNumberStyle={{
-            color: 'hsl(var(--muted-foreground))',
-            paddingRight: '1rem',
-            minWidth: '2.5rem',
-          }}
-          showLineNumbers={showLineNumbers}
-          style={atomOneLight}
-        >
-          {code}
-        </SyntaxHighlighter>
-        <SyntaxHighlighter
-          className="hidden overflow-hidden dark:block"
-          codeTagProps={{
-            className: 'font-mono text-sm',
-          }}
-          customStyle={{
-            margin: 0,
-            padding: '1rem',
-            fontSize: '0.875rem',
-            background: 'hsl(var(--background))',
-            color: 'hsl(var(--foreground))',
-          }}
-          language={language}
-          lineNumberStyle={{
-            color: 'hsl(var(--muted-foreground))',
-            paddingRight: '1rem',
-            minWidth: '2.5rem',
-          }}
-          showLineNumbers={showLineNumbers}
-          style={atomOneDark}
-        >
-          {code}
-        </SyntaxHighlighter>
-        {children && (
-          <div className="absolute top-2 right-2 flex items-center gap-2">{children}</div>
+}: CodeBlockProps) => {
+  const { theme } = useTheme();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const updateTheme = () => {
+      if (theme === 'dark') {
+        setIsDark(true);
+      } else if (theme === 'light') {
+        setIsDark(false);
+      } else {
+        // system theme
+        setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+    };
+
+    updateTheme();
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', updateTheme);
+      return () => mediaQuery.removeEventListener('change', updateTheme);
+    }
+  }, [theme]);
+
+  return (
+    <CodeBlockContext.Provider value={{ code }}>
+      <div
+        className={cn(
+          'relative w-full overflow-hidden rounded-md border bg-background text-foreground',
+          className,
         )}
+        {...props}
+      >
+        <div className="relative">
+          <SyntaxHighlighter
+            className="overflow-hidden"
+            codeTagProps={{
+              className: 'font-mono text-sm',
+            }}
+            customStyle={{
+              margin: 0,
+              padding: '1rem',
+              fontSize: '0.875rem',
+              background: 'hsl(var(--background))',
+              color: 'hsl(var(--foreground))',
+            }}
+            language={language}
+            lineNumberStyle={{
+              color: 'hsl(var(--muted-foreground))',
+              paddingRight: '1rem',
+              minWidth: '2.5rem',
+            }}
+            showLineNumbers={showLineNumbers}
+            style={isDark ? atomOneDark : atomOneLight}
+          >
+            {code}
+          </SyntaxHighlighter>
+          {children && (
+            <div className="absolute top-2 right-2 flex items-center gap-2">{children}</div>
+          )}
+        </div>
       </div>
-    </div>
-  </CodeBlockContext.Provider>
-);
+    </CodeBlockContext.Provider>
+  );
+};
 
 export type CodeBlockCopyButtonProps = ComponentProps<typeof Button> & {
   onCopy?: () => void;

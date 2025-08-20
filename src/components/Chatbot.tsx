@@ -22,6 +22,7 @@ import type { ToolUIPart } from 'ai';
 import { Response } from '@/components/ai-elements/response';
 import { Button } from '@/components/ui/button';
 import { SquarePen } from 'lucide-react';
+import { ModeToggleButton } from '@/components/ui/mode-toggle';
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
@@ -96,6 +97,7 @@ export const Chatbot = () => {
           >
             <SquarePen />
           </Button>
+          <ModeToggleButton />
         </div>
 
         <Conversation className="h-full">
