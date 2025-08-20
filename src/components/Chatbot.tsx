@@ -20,6 +20,8 @@ import { useEffect, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import type { ToolUIPart } from 'ai';
 import { Response } from '@/components/ai-elements/response';
+import { Button } from '@/components/ui/button';
+import { SquarePen } from 'lucide-react';
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
@@ -35,7 +37,7 @@ import { useModels } from '@/hooks/useModels';
 export const Chatbot = () => {
   const [input, setInput] = useState('');
   const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
-  const { messages, sendMessage, status } = useChat();
+  const { messages, sendMessage, status, setMessages } = useChat();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,13 +54,29 @@ export const Chatbot = () => {
     }
   };
 
+  const handleNewConversation = () => {
+    setMessages([]);
+  };
+
   useEffect(() => {
     fetchModels();
-  }, []);
+  }, [fetchModels]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full h-screen">
+    <div className="max-w-4xl mx-auto p-6 pt-0 relative size-full h-screen">
       <div className="flex flex-col h-full">
+        <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center p-2">
+          <Button
+            onClick={handleNewConversation}
+            variant="outline"
+            size="icon"
+            disabled={messages.length === 0}
+            title="New Conversation"
+          >
+            <SquarePen />
+          </Button>
+        </div>
+
         <Conversation className="h-full">
           <ConversationContent>
             {messages.map((message) => (
