@@ -6,7 +6,6 @@ import {
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem,
@@ -19,10 +18,18 @@ import {
 } from '@/components/ai-elements/prompt-input';
 import { useEffect, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
+import type { ToolUIPart } from 'ai';
 import { Response } from '@/components/ai-elements/response';
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from '@/components/ai-elements/tool';
 import { useModels } from '@/hooks/useModels';
 
 export const Chatbot = () => {
@@ -99,6 +106,36 @@ export const Chatbot = () => {
                             </Reasoning>
                           );
                         default:
+                          // Handle tool calls - AI SDK tool parts have types that start with "tool-"
+                          if (part.type.startsWith('tool-')) {
+                            const toolPart = part as ToolUIPart;
+                            return (
+                              <Tool
+                                key={`${message.id}-${i}`}
+                                defaultOpen={
+                                  toolPart.state === 'output-available' ||
+                                  toolPart.state === 'output-error'
+                                }
+                              >
+                                <ToolHeader type={toolPart.type} state={toolPart.state} />
+                                <ToolContent>
+                                  <ToolInput input={toolPart.input} />
+                                  <ToolOutput
+                                    output={
+                                      toolPart.output ? (
+                                        <Response>
+                                          {typeof toolPart.output === 'string'
+                                            ? toolPart.output
+                                            : JSON.stringify(toolPart.output, null, 2)}
+                                        </Response>
+                                      ) : undefined
+                                    }
+                                    errorText={toolPart.errorText}
+                                  />
+                                </ToolContent>
+                              </Tool>
+                            );
+                          }
                           return null;
                       }
                     })}

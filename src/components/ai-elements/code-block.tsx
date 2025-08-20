@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import {
-  oneDark,
-  oneLight,
-} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+// @ts-ignore
+import atomOneDark from 'react-syntax-highlighter/dist/styles/atom-one-dark';
+// @ts-ignore
+import atomOneLight from 'react-syntax-highlighter/dist/styles/atom-one-light';
 
 type CodeBlockContextType = {
   code: string;
@@ -38,12 +38,11 @@ export const CodeBlock = ({
     <div
       className={cn(
         'relative w-full overflow-hidden rounded-md border bg-background text-foreground',
-        className
+        className,
       )}
       {...props}
     >
       <div className="relative">
-        {/* @ts-expect-error - SyntaxHighlighter is not a valid JSX component */}
         <SyntaxHighlighter
           className="overflow-hidden dark:hidden"
           codeTagProps={{
@@ -63,11 +62,10 @@ export const CodeBlock = ({
             minWidth: '2.5rem',
           }}
           showLineNumbers={showLineNumbers}
-          style={oneLight}
+          style={atomOneLight}
         >
           {code}
         </SyntaxHighlighter>
-        {/* @ts-expect-error - SyntaxHighlighter is not a valid JSX component */}
         <SyntaxHighlighter
           className="hidden overflow-hidden dark:block"
           codeTagProps={{
@@ -87,14 +85,12 @@ export const CodeBlock = ({
             minWidth: '2.5rem',
           }}
           showLineNumbers={showLineNumbers}
-          style={oneDark}
+          style={atomOneDark}
         >
           {code}
         </SyntaxHighlighter>
         {children && (
-          <div className="absolute top-2 right-2 flex items-center gap-2">
-            {children}
-          </div>
+          <div className="absolute top-2 right-2 flex items-center gap-2">{children}</div>
         )}
       </div>
     </div>
