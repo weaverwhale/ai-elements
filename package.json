@@ -12,9 +12,9 @@
     "build:backend": "tsc -p tsconfig.node.json",
     "build": "npm run clean && npm run build:backend && npm run build:frontend",
     "lint": "eslint .",
-    "backend:serve": "tsx dist/backend/server.js",
+    "backend:serve": "tsx build/server/server.js",
     "prod": "npm run build && npm run backend:serve",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist build",
     "start": "npm run build && npm run backend:serve"
   },
   "dependencies": {

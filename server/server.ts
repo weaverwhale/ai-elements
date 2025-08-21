@@ -13,19 +13,31 @@ import { getAvailableModelProviders } from './modelProviders';
 const app = express();
 const PORT = process.env.PORT || 1753;
 
-// Configure CORS to accept requests from the Vite dev server
+// Configure CORS to accept requests from the Vite dev server and production
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  'http://localhost',
+  'http://127.0.0.1',
+];
+
+// In production, add Railway domain if available
+if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_PUBLIC_DOMAIN) {
+  allowedOrigins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
+}
+
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
 
 app.use(express.json());
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
+// Middleware for logging requests
 app.use((req, _res, next) => {
   console.log(`[SERVER] ${new Date().toISOString()} ${req.method} ${req.url}`);
   next();
@@ -86,6 +98,23 @@ app.get('/api/suggestions', async (req, res) => {
   }
 });
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// In production, serve the built React app
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the dist directory
+  app.use(express.static(path.join(process.cwd(), 'dist')));
+
+  // Handle React Router - serve index.html for all non-API routes
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+    res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+  });
+}
+
 function webToNodeStream(webStream: ReadableStream): Readable {
   const nodeStream = new Readable({ read: () => {} });
   const reader = webStream.getReader();
@@ -127,7 +156,7 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Invalid messages format' });
     }
 
-    console.log('[SERVER] Processing chat request...');
+    console.log(`[SERVER] Processing chat request with ${modelId}...`);
     const response = await handleChatRequest({
       messages,
       modelId,
