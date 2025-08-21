@@ -10,12 +10,12 @@
     "d": "npm run dev",
     "build:frontend": "vite build",
     "build:backend": "tsc -p tsconfig.node.json",
+    "serve": "tsx build/server/server.js",
     "build": "npm run clean && npm run build:backend && npm run build:frontend",
+    "prod": "npm run build && npm run start",
     "lint": "eslint .",
-    "backend:serve": "tsx build/server/server.js",
-    "prod": "npm run build && npm run backend:serve",
     "clean": "rm -rf dist build",
-    "start": "npm run backend:serve"
+    "start": "npm run serve"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.3",

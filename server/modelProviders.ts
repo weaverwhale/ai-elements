@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
 // import { groq } from '@ai-sdk/groq';
 // import { deepseek } from '@ai-sdk/deepseek';
-// import { cerebras } from '@ai-sdk/cerebras';
+import { cerebras } from '@ai-sdk/cerebras';
 // import { google } from '@ai-sdk/google';
 // import { createVertex } from '@ai-sdk/google-vertex';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
@@ -79,13 +79,6 @@ export const modelProviders: ModelProvider[] = [
     defaultSystemPrompt,
   },
   // {
-  //   id: 'groq-llama-3-8b-8192',
-  //   name: 'Llama 3.8B (Groq)',
-  //   available: checkApiKey(process.env.GROQ_API_KEY, 'GROQ'),
-  //   model: groq('llama3-8b-8192'),
-  //   defaultSystemPrompt,
-  // },
-  // {
   //   id: 'groq-qwen-2.5-32b',
   //   name: 'Qwen 2.5 32B (Groq)',
   //   available: checkApiKey(process.env.GROQ_API_KEY, 'GROQ'),
@@ -107,6 +100,13 @@ export const modelProviders: ModelProvider[] = [
   //   defaultSystemPrompt:
   //     'You are a helpful AI assistant powered by DeepSeek. You can help with getting information about weather and location, and telling the current time.',
   // },
+  {
+    id: 'gpt-oss-120b',
+    name: 'GPT-OSS 120B (Groq)',
+    available: checkApiKey(process.env.CEREBRAS_API_KEY, 'CEREBRAS'),
+    model: cerebras('gpt-oss-120b'),
+    defaultSystemPrompt,
+  },
   // {
   //   id: 'cerebras-llama-3-3-70b',
   //   name: 'Llama 3.3 70B (Cerebras)',
@@ -149,48 +149,52 @@ export const modelProviders: ModelProvider[] = [
   //   model: lmstudio('gemma-3-4b-it-qat'),
   //   defaultSystemPrompt,
   // },
-  {
-    id: 'qwen3-1.7b',
-    name: 'Qwen 3.1 1.7B (LMStudio)',
-    available: true,
-    model: lmstudio('qwen3-1.7b'),
-    defaultSystemPrompt,
-  },
-  {
-    id: 'mistral-nemo-instruct-2407',
-    name: 'Mistral Nemo Instruct (LMStudio)',
-    available: true,
-    model: lmstudio('mistral-nemo-instruct-2407'),
-    defaultSystemPrompt,
-  },
-  {
-    id: 'gemma-3-4b-it-abliterated-v2',
-    name: 'Gemma 3 4B Abliterated V2 (LMStudio)',
-    available: true,
-    model: lmstudio('gemma-3-4b-it-abliterated-v2'),
-    defaultSystemPrompt,
-  },
-  {
-    id: 'nanidao-deepseek-r1-qwen-2.5-32b-ablated',
-    name: 'Nanidao DeepSeek R1 Qwen 2.5 32B Ablated (LMStudio)',
-    available: true,
-    model: lmstudio('nanidao-deepseek-r1-qwen-2.5-32b-ablated'),
-    defaultSystemPrompt,
-  },
-  // {
-  //   id: 'gpt-oss-20b',
-  //   name: 'GPT-OSS 20B (LMStudio)',
-  //   available: true,
-  //   model: lmstudio('gpt-oss-20b'),
-  //   defaultSystemPrompt,
-  // },
-  {
-    id: 'huihui-gpt-oss-20b-abliterated',
-    name: 'GPT-OSS 20B Abliterated (LMStudio)',
-    available: true,
-    model: lmstudio('huihui-gpt-oss-20b-abliterated'),
-    defaultSystemPrompt,
-  },
+  ...(process.env.NODE_ENV !== 'production'
+    ? [
+        {
+          id: 'qwen3-1.7b',
+          name: 'Qwen 3.1 1.7B (LMStudio)',
+          available: true,
+          model: lmstudio('qwen3-1.7b'),
+          defaultSystemPrompt,
+        },
+        {
+          id: 'mistral-nemo-instruct-2407',
+          name: 'Mistral Nemo Instruct (LMStudio)',
+          available: true,
+          model: lmstudio('mistral-nemo-instruct-2407'),
+          defaultSystemPrompt,
+        },
+        {
+          id: 'gemma-3-4b-it-abliterated-v2',
+          name: 'Gemma 3 4B Abliterated V2 (LMStudio)',
+          available: true,
+          model: lmstudio('gemma-3-4b-it-abliterated-v2'),
+          defaultSystemPrompt,
+        },
+        {
+          id: 'nanidao-deepseek-r1-qwen-2.5-32b-ablated',
+          name: 'Nanidao DeepSeek R1 Qwen 2.5 32B Ablated (LMStudio)',
+          available: true,
+          model: lmstudio('nanidao-deepseek-r1-qwen-2.5-32b-ablated'),
+          defaultSystemPrompt,
+        },
+        // {
+        //   id: 'gpt-oss-20b',
+        //   name: 'GPT-OSS 20B (LMStudio)',
+        //   available: true,
+        //   model: lmstudio('gpt-oss-20b'),
+        //   defaultSystemPrompt,
+        // },
+        {
+          id: 'huihui-gpt-oss-20b-abliterated',
+          name: 'GPT-OSS 20B Abliterated (LMStudio)',
+          available: true,
+          model: lmstudio('huihui-gpt-oss-20b-abliterated'),
+          defaultSystemPrompt,
+        },
+      ]
+    : []),
 ];
 
 export function getModelProviderById(id: string): ModelProvider | undefined {
