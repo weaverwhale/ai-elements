@@ -5,7 +5,6 @@ import { forecast } from './forecast';
 import { wikipedia } from './wikipedia';
 import { weeklyReport } from './weeklyReport';
 import { memory } from './memory';
-import { vectorStore } from './vectorStore';
 import { generativeUi } from './generativeUI';
 import { operator } from './operator';
 import { webSearch } from './webSearch';
@@ -21,7 +20,6 @@ export const tools = {
   wikipedia,
   weeklyReport,
   memory,
-  vectorStore,
   generativeUi,
   webSearch,
   operator,
@@ -38,7 +36,6 @@ export const geminiTools = {
   wikipedia,
   weeklyReport,
   memory,
-  vectorStore,
   generativeUi,
   webSearch,
   operator,
