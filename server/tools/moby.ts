@@ -58,7 +58,7 @@ const moby = {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { messages: { text: string }[] };
       const lastMessageText = data.messages?.[data.messages.length - 1]?.text + ' ';
 
       return lastMessageText || 'No answer received from Moby. ';

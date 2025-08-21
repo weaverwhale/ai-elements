@@ -1,18 +1,18 @@
 import type { LanguageModel } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { groq } from '@ai-sdk/groq';
-import { deepseek } from '@ai-sdk/deepseek';
-import { cerebras } from '@ai-sdk/cerebras';
-import { google } from '@ai-sdk/google';
+// import { groq } from '@ai-sdk/groq';
+// import { deepseek } from '@ai-sdk/deepseek';
+// import { cerebras } from '@ai-sdk/cerebras';
+// import { google } from '@ai-sdk/google';
+// import { createVertex } from '@ai-sdk/google-vertex';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { createVertex } from '@ai-sdk/google-vertex';
 import { defaultSystemPrompt } from './prompts';
 
-const vertex = createVertex({
-  project: 'shofifi',
-  location: 'us-east5',
-});
+// const vertex = createVertex({
+//   project: 'shofifi',
+//   location: 'us-east5',
+// });
 
 const lmstudio = createOpenAICompatible({
   name: 'lmstudio',

@@ -23,7 +23,7 @@ const wikipedia = {
         throw new Error(`Wikipedia API returned ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { extract: string };
       console.log('Wikipedia data:', JSON.stringify(data));
 
       // Return a string result immediately

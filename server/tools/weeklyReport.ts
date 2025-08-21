@@ -183,12 +183,12 @@ async function makeGitHubGraphQLRequest<T>(
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GitHubGraphQLResponse<T>;
     if (data.errors) {
       throw new Error(`GitHub GraphQL response errors: ${JSON.stringify(data.errors)}`);
     }
 
-    return data as GitHubGraphQLResponse<T>;
+    return data;
   } catch (error) {
     console.error(`Error in makeGitHubGraphQLRequest:`, error);
     throw error;
@@ -694,7 +694,7 @@ async function generateWeeklyReport(
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const data = (await response.json()) as { choices: { message: { content: string } }[] };
           const summary = data.choices[0].message.content;
           reportContent += `\n### Quick Summary:\n${summary}\n`;
         }
