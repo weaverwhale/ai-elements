@@ -185,7 +185,7 @@ ${functionBody}
       <div className="mb-4 border rounded-lg overflow-hidden">
         <LiveProvider code={cleanCode} scope={scope}>
           {/* Show the rendered component */}
-          <div className="border-b bg-white p-4">
+          <div className="border-b bg-white p-4 text-black">
             <ComponentErrorBoundary onError={onError}>
               <div className="w-full generative-ui-container">
                 <LivePreview />
