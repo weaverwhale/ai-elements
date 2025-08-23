@@ -342,7 +342,7 @@ export const Chatbot = () => {
                   <SelectContent>
                     {availableConversations.map((conv) => (
                       <SelectItem key={conv.id} value={conv.id} className="relative">
-                        <div className="flex items-center justify-between w-full group">
+                        <div className="flex items-center justify-between w-full group/item">
                           <div className="flex flex-col items-start min-w-0">
                             <span className="text-sm font-medium truncate max-w-40">
                               {conv.title}
@@ -355,11 +355,22 @@ export const Chatbot = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 ml-2 hover:bg-destructive hover:text-destructive-foreground"
-                            onMouseDown={(e) => handleDeleteConversation(e, conv.id)}
+                            className="group/button absolute top-1/2 -translate-y-1/2 right-2 opacity-0 button-group group-hover/item:opacity-100 transition-opacity h-6 w-6 p-0 ml-2"
+                            onMouseDown={async (e) => {
+                              if (
+                                await window.confirm(
+                                  'Are you sure you want to delete this conversation?',
+                                )
+                              ) {
+                                handleDeleteConversation(e, conv.id);
+                              }
+                            }}
                             title="Delete Conversation"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2
+                              className="h-3 w-3 text-red-200 group-hover/button:text-red-500 transition-colors"
+                              color="currentColor"
+                            />
                           </Button>
                         </div>
                       </SelectItem>

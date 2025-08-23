@@ -27,7 +27,7 @@ const moby = {
       .string()
       .optional()
       .describe('Shopify store URL')
-      .default('madisonbraids.myshopify.com'),
+      .default('westside-barbell.myshopify.com'),
     parentMessageId: z.string().optional().describe('Parent message ID for conversation context'),
   }),
   execute: async ({ question, shopId, parentMessageId }: MobyParams) => {

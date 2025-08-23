@@ -1,10 +1,101 @@
 .generative-ui-container {
-  border: 1px solid var(--border-color);
-  padding: 1rem;
-  border-radius: var(--border-radius);
+  /* Only override spacing utilities - remove conflicting styles */
+  position: relative;
+}
+
+/* Ensure Tailwind utilities work within LiveProvider context */
+.generative-ui-container .gap-1 {
+  gap: 0.25rem;
+}
+.generative-ui-container .gap-2 {
+  gap: 0.5rem;
+}
+.generative-ui-container .gap-3 {
+  gap: 0.75rem;
+}
+.generative-ui-container .gap-4 {
+  gap: 1rem;
+}
+.generative-ui-container .gap-5 {
+  gap: 1.25rem;
+}
+.generative-ui-container .gap-6 {
+  gap: 1.5rem;
+}
+.generative-ui-container .gap-8 {
+  gap: 2rem;
+}
+
+.generative-ui-container .mb-1 {
+  margin-bottom: 0.25rem;
+}
+.generative-ui-container .mb-2 {
+  margin-bottom: 0.5rem;
+}
+.generative-ui-container .mb-3 {
+  margin-bottom: 0.75rem;
+}
+.generative-ui-container .mb-4 {
+  margin-bottom: 1rem;
+}
+.generative-ui-container .mb-6 {
+  margin-bottom: 1.5rem;
+}
+.generative-ui-container .mb-8 {
+  margin-bottom: 2rem;
+}
+
+.generative-ui-container .mt-1 {
+  margin-top: 0.25rem;
+}
+.generative-ui-container .mt-2 {
   margin-top: 0.5rem;
-  background-color: var(--secondary-bg-color);
-  overflow-x: auto;
+}
+.generative-ui-container .mt-3 {
+  margin-top: 0.75rem;
+}
+.generative-ui-container .mt-4 {
+  margin-top: 1rem;
+}
+.generative-ui-container .mt-6 {
+  margin-top: 1.5rem;
+}
+.generative-ui-container .mt-8 {
+  margin-top: 2rem;
+}
+
+.generative-ui-container .mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+.generative-ui-container .mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.generative-ui-container .mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+.generative-ui-container .mx-6 {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.generative-ui-container .my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.generative-ui-container .my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.generative-ui-container .my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.generative-ui-container .my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .generative-ui-container p {
