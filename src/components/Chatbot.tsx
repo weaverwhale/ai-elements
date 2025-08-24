@@ -174,7 +174,7 @@ export const Chatbot = () => {
   }, [messages, selectedModel, status, isLoadingConversation, saveConversation]);
 
   return (
-    <div className="max-w-4xl mx-auto relative size-full h-screen">
+    <div className="max-w-4xl mx-auto relative size-full h-[100dvh]">
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
           <ConversationContent>
