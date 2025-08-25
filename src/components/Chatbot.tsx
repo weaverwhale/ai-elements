@@ -16,13 +16,13 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useChat } from '@ai-sdk/react';
 import type { ToolUIPart } from 'ai';
 import { Response } from '@/components/ai-elements/response';
 import { Button } from '@/components/ui/button';
-import { SquarePen, RefreshCcwIcon, CopyIcon, History, Save, Trash2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { SquarePen, RefreshCcwIcon, CopyIcon } from 'lucide-react';
+import { SearchableConversationDropdown } from '@/components/ai-elements/conversations';
 import { ModeToggleButton } from '@/components/ui/mode-toggle';
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
 import { Actions, Action } from '@/components/ai-elements/actions';
@@ -44,6 +44,7 @@ import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion';
 export const Chatbot = () => {
   const [input, setInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messages, sendMessage, status, setMessages, regenerate } = useChat();
   const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
   const toolOptions = useToolOptions();
@@ -144,6 +145,13 @@ export const Chatbot = () => {
   useEffect(() => {
     fetchModels();
   }, [fetchModels]);
+
+  // Focus the input on component mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
 
   // Auto-load conversation from URL when currentConversationId changes
   useEffect(() => {
@@ -304,6 +312,8 @@ export const Chatbot = () => {
                     key={`placeholder-${index}`}
                     suggestion=""
                     className="animate-pulse pointer-events-none"
+                    index={index}
+                    length={6}
                   >
                     <div className="h-3 bg-muted-foreground/30 rounded w-40"></div>
                   </Suggestion>
@@ -314,15 +324,20 @@ export const Chatbot = () => {
                     onClick={handleSuggestionClick}
                     suggestion={suggestion.text}
                     index={index}
+                    length={suggestions.length}
                   />
                 ))}
           </Suggestions>
         )}
 
         <PromptInput onSubmit={handleSubmit}>
-          <PromptInputTextarea onChange={(e) => setInput(e.target.value)} value={input} />
-          <PromptInputToolbar className="p-2">
-            <div className="flex items-center gap-2">
+          <PromptInputTextarea
+            ref={textareaRef}
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
+          />
+          <PromptInputToolbar className="flex gap-2 p-2">
+            <div className="flex items-center gap-2 overflow-scroll">
               <Button
                 onClick={handleNewConversation}
                 variant="outline"
@@ -334,57 +349,13 @@ export const Chatbot = () => {
                 <SquarePen />
               </Button>
 
-              {availableConversations.length > 0 && (
-                <Select onValueChange={handleLoadConversation}>
-                  <SelectTrigger>
-                    <History className="size-4" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableConversations.map((conv) => (
-                      <SelectItem key={conv.id} value={conv.id} className="relative">
-                        <div className="flex items-center justify-between w-full group/item">
-                          <div className="flex flex-col items-start min-w-0">
-                            <span className="text-sm font-medium truncate max-w-40">
-                              {conv.title}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {conv.messageCount} messages • {conv.updatedAt.toLocaleDateString()}
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="group/button absolute top-1/2 -translate-y-1/2 right-2 opacity-0 button-group group-hover/item:opacity-100 transition-opacity h-6 w-6 p-0 ml-2"
-                            onMouseDown={async (e) => {
-                              if (
-                                await window.confirm(
-                                  'Are you sure you want to delete this conversation?',
-                                )
-                              ) {
-                                handleDeleteConversation(e, conv.id);
-                              }
-                            }}
-                            title="Delete Conversation"
-                          >
-                            <Trash2
-                              className="h-3 w-3 text-red-200 group-hover/button:text-red-500 transition-colors"
-                              color="currentColor"
-                            />
-                          </Button>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {isSaving && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Save className="size-3 animate-pulse" />
-                  <span>Saving...</span>
-                </div>
-              )}
+              <SearchableConversationDropdown
+                conversations={availableConversations}
+                onSelectConversation={handleLoadConversation}
+                onDeleteConversation={handleDeleteConversation}
+                isLoading={isLoading}
+                isSaving={isSaving}
+              />
 
               <ModeToggleButton />
 

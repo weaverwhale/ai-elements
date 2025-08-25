@@ -18,6 +18,7 @@ export type SuggestionProps = Omit<ComponentProps<typeof Button>, 'onClick'> & {
   suggestion: string;
   onClick?: (suggestion: string) => void;
   index?: number;
+  length?: number;
 };
 
 export const Suggestion = ({
@@ -28,6 +29,7 @@ export const Suggestion = ({
   size = 'sm',
   children,
   index,
+  length,
   ...props
 }: SuggestionProps) => {
   const handleClick = () => {
@@ -36,7 +38,12 @@ export const Suggestion = ({
 
   return (
     <Button
-      className={cn('cursor-pointer rounded-full px-4', className, index === 0 && 'ml-2')}
+      className={cn(
+        'cursor-pointer rounded-full px-4',
+        className,
+        index === 0 && 'ml-2',
+        index === (length ?? 0) - 1 && 'mr-2',
+      )}
       onClick={handleClick}
       size={size}
       type="button"

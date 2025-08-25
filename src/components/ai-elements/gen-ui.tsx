@@ -101,7 +101,7 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
 
   // Clean and prepare the code string
   const cleanCode = useMemo(() => {
-    let code = jsxString.trim();
+    let code = jsxString?.trim() ?? '';
 
     // Remove markdown code block wrapper if present
     if (code.startsWith('```jsx') && code.endsWith('```')) {
