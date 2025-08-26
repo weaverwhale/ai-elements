@@ -122,15 +122,12 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
       return urlParams.get('conversation');
     };
 
-    // Navigate to the viewer page with URL params including conversation ID
-    const encodedJsx = encodeURIComponent(jsxString);
+    // Navigate to the viewer page with only conversation ID
     const conversationId = getCurrentConversationId();
-    let url = `/genui-viewer?jsx=${encodedJsx}&title=${encodeURIComponent(
-      'Generated UI Component',
-    )}`;
+    let url = `/genui-viewer`;
 
     if (conversationId) {
-      url += `&conversation=${encodeURIComponent(conversationId)}`;
+      url += `?conversation=${encodeURIComponent(conversationId)}`;
     }
 
     window.open(url, '_blank');
@@ -199,19 +196,19 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
 
       // Wrap in IIFE pattern that react-live expects
       code = `(() => {
-${code}
-  return <${componentName} />;
-})()`;
+      ${code}
+        return <${componentName} />;
+      })()`;
     } else if (code.trim().startsWith('<')) {
       // Pure JSX, wrap it in IIFE
       code = `(() => {
-  const GeneratedComponent = () => {
-    return (
-${code}
-    );
-  };
-  return <GeneratedComponent />;
-})()`;
+        const GeneratedComponent = () => {
+          return (
+      ${code}
+          );
+        };
+        return <GeneratedComponent />;
+      })()`;
     }
 
     // Debug logs removed - issue resolved
