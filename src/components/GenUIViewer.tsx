@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router';
+import { ArrowLeft, Copy, Download, Share2 } from 'lucide-react';
 import GenerativeUI from './ai-elements/gen-ui';
 import { Button } from './ui/button';
-import { ArrowLeft, Copy, Download, Share2 } from 'lucide-react';
 
 export const GenUIViewer = () => {
   const [searchParams] = useSearchParams();
@@ -33,6 +33,8 @@ export const GenUIViewer = () => {
         } else {
           setJsxString('No component data found. Please generate a UI component first.');
         }
+
+        setConversationId(conversationIdFromUrl);
       } catch (error) {
         console.error('Failed to load from localStorage:', error);
         setJsxString('Error loading component data');

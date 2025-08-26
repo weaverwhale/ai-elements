@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router';
 import { LiveProvider, LiveError, LivePreview } from 'react-live';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -101,7 +102,8 @@ const createSafeScope = () => ({
 });
 
 const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
-  // console.log('🔍 Raw jsxString received:', jsxString?.substring(0, 200));
+  const location = useLocation();
+  const pathname = location.pathname;
 
   // Memoize the safe scope to avoid recreation on every render
   const scope = useMemo(() => createSafeScope(), []);
@@ -223,15 +225,17 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
             <span className="text-sm font-medium text-muted-foreground">
               Generated UI Component
             </span>
-            <Button
-              onClick={openInViewer}
-              variant="outline"
-              size="sm"
-              className="gap-2 text-xs h-8"
-            >
-              <ExternalLink className="h-3 w-3" />
-              View Full Screen
-            </Button>
+            {!pathname.includes('genui-viewer') && (
+              <Button
+                onClick={openInViewer}
+                variant="outline"
+                size="sm"
+                className="gap-2 text-xs h-8"
+              >
+                <ExternalLink className="h-3 w-3" />
+                View Full Screen
+              </Button>
+            )}
           </div>
 
           {/* Show the rendered component */}
