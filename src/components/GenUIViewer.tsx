@@ -7,43 +7,35 @@ import { ArrowLeft, Copy, Download, Share2 } from 'lucide-react';
 export const GenUIViewer = () => {
   const [searchParams] = useSearchParams();
   const [jsxString, setJsxString] = useState<string>('');
-  const [title, setTitle] = useState<string>('');
   const [copySuccess, setCopySuccess] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   useEffect(() => {
     // Try to get JSX string from URL params first
     const jsxFromUrl = searchParams.get('jsx');
-    const titleFromUrl = searchParams.get('title') || 'Generated UI Component';
     const conversationIdFromUrl = searchParams.get('conversation');
 
     if (jsxFromUrl) {
       try {
         const decodedJsx = decodeURIComponent(jsxFromUrl);
         setJsxString(decodedJsx);
-        setTitle(titleFromUrl);
         setConversationId(conversationIdFromUrl);
       } catch (error) {
         console.error('Failed to decode JSX from URL:', error);
         setJsxString('Error: Failed to load component data');
-        setTitle('Error');
       }
     } else {
       // Fallback to localStorage if no URL params
       try {
         const storedJsx = localStorage.getItem('genui-viewer-jsx');
-        const storedTitle = localStorage.getItem('genui-viewer-title');
         if (storedJsx) {
           setJsxString(storedJsx);
-          setTitle(storedTitle || 'Generated UI Component');
         } else {
           setJsxString('No component data found. Please generate a UI component first.');
-          setTitle('No Component');
         }
       } catch (error) {
         console.error('Failed to load from localStorage:', error);
         setJsxString('Error loading component data');
-        setTitle('Error');
       }
     }
   }, [searchParams]);
@@ -63,7 +55,7 @@ export const GenUIViewer = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.jsx`;
+    a.download = `generated-ui-component.jsx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -75,8 +67,8 @@ export const GenUIViewer = () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `AI Elements - ${title}`,
-          text: 'Check out this generated UI component!',
+          title: `AI Elements - Generated UI Component`,
+          text: 'Check out this report!',
           url: currentUrl,
         });
       } else {
@@ -102,10 +94,6 @@ export const GenUIViewer = () => {
                   Back to Chat
                 </Button>
               </Link>
-              <div>
-                <h1 className="text-xl font-semibold">{title}</h1>
-                <p className="text-sm text-muted-foreground">Full Screen UI Component View</p>
-              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="gap-2">
@@ -130,7 +118,7 @@ export const GenUIViewer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto py-4">
+      <div className="container mx-auto p-4">
         {jsxString ? (
           <GenerativeUI
             jsxString={jsxString}
