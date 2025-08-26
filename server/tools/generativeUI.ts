@@ -19,12 +19,12 @@ const generativeUi = {
   id: 'generativeUi',
   name: 'Generative UI',
   description:
-    'Generates complete, self-contained React components with hardcoded data based on a description. Creates full functional components with all necessary data defined within the component itself. Uses Tailwind CSS for styling.',
+    'Generates complete, self-contained React components using real data from conversation context. Creates full functional components that extract and use actual numbers, values, and data from the conversation history instead of hardcoded examples. Uses Tailwind CSS for styling.',
   inputSchema: z.object({
     description: z
       .string()
       .describe(
-        'A detailed natural language description of the desired UI component. Should generate a complete React component with all data hardcoded within the component itself. Do NOT generate wrapper components that import other components. Include specific layout, elements, and styling instructions (Tailwind CSS).',
+        'A detailed natural language description of the desired UI component. Should generate a complete React component that uses real data from the conversation context. Do NOT generate wrapper components that import other components. Include specific layout, elements, and styling instructions (Tailwind CSS).',
       ),
     conversationHistory: z
       .array(messageSchema) // Validate as an array of messages

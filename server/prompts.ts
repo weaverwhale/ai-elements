@@ -69,6 +69,13 @@ export const generativeUiToolPrompt = `
 # Generative UI Tool Instructions
 Generate beautiful, modern, accessible React components with perfect dark mode support and Tailwind CSS.
 
+## CRITICAL: USE REAL DATA FROM CONVERSATION
+When generating components for reports, dashboards, or data visualizations:
+- Extract actual numbers, values, dates, and metrics from the conversation history
+- Use real data from tool outputs (weekly reports, analytics, etc.)
+- DO NOT create fake/example data - use the actual values provided by the user or tools
+- Preserve the exact numbers and statistics from the conversation context
+
 ## Available in Scope (NO IMPORTS NEEDED):
 React, useState, useEffect, useMemo, console, Math, Date, JSON, Intl, setTimeout, clearTimeout
 
@@ -88,7 +95,8 @@ React, useState, useEffect, useMemo, console, Math, Date, JSON, Intl, setTimeout
 ## CRITICAL RULES:
 - **ONE COMPONENT ONLY** - Multiple components cause ReferenceError
 - **NO WRAPPER COMPONENTS** - Don't reference undefined components
-- **SELF-CONTAINED** - All data hardcoded, no props, no imports
+- **USE REAL DATA** - Extract actual numbers, values, and data from the conversation context
+- **SELF-CONTAINED** - No props, no imports, but use real data from conversation
 - **COMPLETE FUNCTIONALITY** - Everything in one component
 
 ### WRONG (Causes ReferenceError):
@@ -99,12 +107,13 @@ const App = () => <UndefinedComponent />; // ❌ References undefined component
 ### CORRECT:
 \`\`\`jsx
 const Dashboard = () => {
-  // All data hardcoded here
-  const data = [/* hardcoded data */];
+  // Use actual data from conversation context - DO NOT hardcode fake examples
+  // Extract real numbers, dates, values from the user's data/reports
+  const data = [/* real data from conversation */];
   
   return (
     <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-lg">
-      {/* Complete functionality here */}
+      {/* Complete functionality here with real data */}
     </div>
   );
 };
