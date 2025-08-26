@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { LiveProvider, LiveError, LivePreview } from 'react-live';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 import './gen-ui.css';
 
 interface GenerativeUIProps {
@@ -31,12 +33,12 @@ class ComponentErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="bg-red-50 border border-red-200 rounded p-4">
-          <h3 className="text-red-800 font-semibold mb-2">Component Error</h3>
-          <p className="text-red-700 text-sm mb-2">
+        <div className="bg-destructive/10 border border-destructive/20 p-4">
+          <h3 className="text-destructive font-semibold mb-2">Component Error</h3>
+          <p className="text-destructive/80 text-sm mb-2">
             The generated component encountered a runtime error:
           </p>
-          <pre className="text-xs bg-red-100 p-2 rounded overflow-x-auto">
+          <pre className="text-xs bg-destructive/5 p-2 overflow-x-auto">
             {this.state.error?.message}
           </pre>
         </div>
@@ -54,6 +56,9 @@ const createSafeScope = () => ({
   useState,
   useEffect,
   useMemo,
+
+  // React-live render function (this is provided by LiveProvider)
+  render: (element: React.ReactElement) => element,
 
   // Safe utility functions
   console: {
@@ -96,112 +101,158 @@ const createSafeScope = () => ({
 });
 
 const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
+  // console.log('🔍 Raw jsxString received:', jsxString?.substring(0, 200));
+
   // Memoize the safe scope to avoid recreation on every render
   const scope = useMemo(() => createSafeScope(), []);
 
-  // Clean and prepare the code string
+  const openInViewer = () => {
+    // Store the JSX string in localStorage as backup
+    try {
+      localStorage.setItem('genui-viewer-jsx', jsxString);
+      localStorage.setItem('genui-viewer-title', 'Generated UI Component');
+    } catch (error) {
+      console.error('Failed to store in localStorage:', error);
+    }
+
+    // Get current conversation ID from URL
+    const getCurrentConversationId = (): string | null => {
+      if (typeof window === 'undefined') return null;
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('conversation');
+    };
+
+    // Navigate to the viewer page with URL params including conversation ID
+    const encodedJsx = encodeURIComponent(jsxString);
+    const conversationId = getCurrentConversationId();
+    let url = `/genui-viewer?jsx=${encodedJsx}&title=${encodeURIComponent(
+      'Generated UI Component',
+    )}`;
+
+    if (conversationId) {
+      url += `&conversation=${encodeURIComponent(conversationId)}`;
+    }
+
+    window.open(url, '_blank');
+  };
+
+  // SIMPLIFIED Clean and prepare the code string
   const cleanCode = useMemo(() => {
     let code = jsxString?.trim() ?? '';
 
-    // Remove markdown code block wrapper if present
-    if (code.startsWith('```jsx') && code.endsWith('```')) {
-      code = code.slice(6, -3).trim(); // Remove ```jsx from start and ``` from end
-    } else if (code.startsWith('```javascript') && code.endsWith('```')) {
-      code = code.slice(13, -3).trim(); // Remove ```javascript from start and ``` from end
-    } else if (code.startsWith('```') && code.endsWith('```')) {
-      code = code.slice(3, -3).trim(); // Remove generic ``` wrappers
-    }
+    // Test code removed - issue resolved
+
+    // Remove markdown code block wrapper if present - more robust approach
+    // Handle various markdown block formats
+    code = code.replace(/^```(?:jsx|javascript|js)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+
+    // Remove any remaining backticks and dollar signs that might be artifacts
+    code = code.replace(/```[\s\S]*$/g, '').replace(/\$\s*$/g, '');
+
+    // Clean up any trailing artifacts
+    code = code.trim();
 
     // Remove any imports as they're not needed (everything is in scope)
     code = code.replace(/^import\s+.*?from\s+['"][^'"]*['"];?\s*/gm, '');
 
-    // Extract function body using manual approach - find arrow function and extract body
-    if (code.includes('=>') && code.includes('{')) {
-      const arrowIndex = code.indexOf('=>');
-      const openBraceIndex = code.indexOf('{', arrowIndex);
+    // Comprehensive sanitization of problematic characters
+    code = code
+      // Remove BOM and other invisible characters
+      .replace(/\uFEFF/g, '') // BOM (Byte Order Mark)
+      .replace(/\u200B/g, '') // Zero-width space
+      .replace(/\u200C/g, '') // Zero-width non-joiner
+      .replace(/\u200D/g, '') // Zero-width joiner
+      .replace(/\u2060/g, '') // Word joiner
+      // Fix dashes and quotes
+      .replace(/–/g, '-') // Em dash to hyphen
+      .replace(/—/g, '-') // Em dash to hyphen
+      .replace(/‑/g, '-') // Non-breaking hyphen to hyphen
+      .replace(/'/g, "'") // Smart quote to regular quote
+      .replace(/'/g, "'") // Smart quote to regular quote
+      .replace(/"/g, '"') // Smart quote to regular quote
+      .replace(/"/g, '"') // Smart quote to regular quote
+      .replace(/…/g, '...') // Ellipsis to three dots
+      // Fix spaces
+      .replace(/\u00A0/g, ' ') // Non-breaking space to regular space
+      .replace(/\u2000/g, ' ') // En quad
+      .replace(/\u2001/g, ' ') // Em quad
+      .replace(/\u2002/g, ' ') // En space
+      .replace(/\u2003/g, ' ') // Em space
+      .replace(/\u2004/g, ' ') // Three-per-em space
+      .replace(/\u2005/g, ' ') // Four-per-em space
+      .replace(/\u2006/g, ' ') // Six-per-em space
+      .replace(/\u2007/g, ' ') // Figure space
+      .replace(/\u2008/g, ' ') // Punctuation space
+      .replace(/\u2009/g, ' ') // Thin space
+      .replace(/\u200A/g, ' ') // Hair space
+      .replace(/\u3000/g, ' '); // Ideographic space
 
-      if (openBraceIndex !== -1) {
-        // Find the last closing brace (end of function)
-        let lastCloseBraceIndex = code.lastIndexOf('};');
-        if (lastCloseBraceIndex === -1) {
-          lastCloseBraceIndex = code.lastIndexOf('}');
-        }
+    // Simple processing - let the AI generate proper code from the start
 
-        if (lastCloseBraceIndex > openBraceIndex) {
-          const functionBody = code.substring(openBraceIndex + 1, lastCloseBraceIndex).trim();
-          code = `function GeneratedComponent() {
-${functionBody}
-}`;
-        } else {
-          code = `function GeneratedComponent() {
-  return (
-    <div className="p-4 bg-red-50 border border-red-200 rounded">
-      <p className="text-red-800">Unable to parse component structure</p>
-    </div>
-  );
-}`;
-        }
-      }
-    }
-    // If it's just JSX (starts with <), wrap it properly
-    else if (code.trim().startsWith('<')) {
-      code = `function GeneratedComponent() {
-  return (
-    ${code}
-  );
-}`;
-    }
-    // Fallback for any other case
-    else {
-      code = `function GeneratedComponent() {
-  return (
-    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
-      <p className="text-yellow-800">Unable to render provided code</p>
-      <details className="mt-2">
-        <summary className="cursor-pointer">Show raw code</summary>
-        <pre className="text-xs mt-2 bg-yellow-100 p-2 rounded overflow-auto">{${JSON.stringify(
-          code,
-        )}}</pre>
-      </details>
-    </div>
-  );
-}`;
-    }
+    // IIFE APPROACH: Wrap component in immediately invoked function expression
+    const componentMatch = code.match(/(?:const|function)\s+(\w+)/);
+    if (componentMatch) {
+      const componentName = componentMatch[1];
+      // console.log('🔍 Detected component name:', componentName);
+      // Remove export default
+      code = code.replace(/^export\s+default\s+\w+;?\s*$/gm, '').trim();
 
-    // Validate that the code looks reasonable
-    if (!code.trim()) {
-      code = `function EmptyComponent() {
-  return (
-    <div className="p-4 text-gray-500">No content provided</div>
-  );
-}`;
+      // Wrap in IIFE pattern that react-live expects
+      code = `(() => {
+${code}
+  return <${componentName} />;
+})()`;
+    } else if (code.trim().startsWith('<')) {
+      // Pure JSX, wrap it in IIFE
+      code = `(() => {
+  const GeneratedComponent = () => {
+    return (
+${code}
+    );
+  };
+  return <GeneratedComponent />;
+})()`;
     }
 
-    return code;
+    // Debug logs removed - issue resolved
+    return code || 'render(<div>No content provided</div>);';
   }, [jsxString]);
 
   return (
-    <div className="mx-4">
-      <div className="mb-4 border rounded-lg overflow-hidden">
+    <div>
+      <div className="mb-4 border overflow-hidden rounded-md">
         <LiveProvider code={cleanCode} scope={scope}>
-          {/* Show the rendered component */}
-          <div className="border-b bg-white p-4 text-black">
-            <ComponentErrorBoundary onError={onError}>
-              <div className="w-full generative-ui-container">
-                <LivePreview />
-              </div>
-            </ComponentErrorBoundary>
+          <div className="bg-muted/50 border-b px-4 py-2 flex justify-between items-center">
+            <span className="text-sm font-medium text-muted-foreground">
+              Generated UI Component
+            </span>
+            <Button
+              onClick={openInViewer}
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs h-8"
+            >
+              <ExternalLink className="h-3 w-3" />
+              View Full Screen
+            </Button>
           </div>
 
+          {/* Show the rendered component */}
+          <ComponentErrorBoundary onError={onError}>
+            <div className="w-full dark:text-background">
+              <LivePreview />
+            </div>
+          </ComponentErrorBoundary>
+
           {/* Show any errors */}
-          <LiveError className="bg-red-50 text-red-700 p-4 text-sm font-mono whitespace-pre-wrap" />
+          <LiveError className="bg-destructive/10 text-destructive p-4 text-sm font-mono whitespace-pre-wrap" />
 
           {/* Show the code */}
-          <details className="bg-gray-50 border-t">
-            <summary className="cursor-pointer p-2 text-sm text-gray-600 hover:bg-gray-100">
+          <details className="bg-muted/50 border-t">
+            <summary className="cursor-pointer p-2 text-sm text-muted-foreground hover:bg-muted">
               Show Generated Code
             </summary>
-            <pre className="p-4 text-xs overflow-x-auto bg-gray-100">
+            <pre className="p-4 text-xs overflow-x-auto">
               <code>{cleanCode}</code>
             </pre>
           </details>

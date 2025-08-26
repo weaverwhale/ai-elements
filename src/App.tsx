@@ -1,5 +1,6 @@
 import './App.css';
 import { Chatbot } from '@/components/Chatbot';
+import { GenUIViewer } from '@/components/GenUIViewer';
 import { Route, Routes } from 'react-router';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -10,6 +11,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<Chatbot />} />
+            <Route path="/genui-viewer" element={<GenUIViewer />} />
           </Routes>
         </main>
       </div>

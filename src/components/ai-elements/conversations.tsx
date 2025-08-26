@@ -170,7 +170,7 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
             <Input
               ref={inputRef}
               type="text"
-              placeholder="Search conversations..."
+              placeholder={`Search ${conversations.length} conversations...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-9"
