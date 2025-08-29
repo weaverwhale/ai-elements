@@ -11,6 +11,7 @@ import { webSearch } from './webSearch';
 import { generateImage } from './generateImage';
 import { generateVideo } from './generateVideo';
 import { executor } from './executor';
+import { solana } from './solana';
 
 export const tools = {
   moby,
@@ -26,6 +27,7 @@ export const tools = {
   generateImage,
   generateVideo,
   executor,
+  solana,
 };
 
 export const geminiTools = {
@@ -42,4 +44,5 @@ export const geminiTools = {
   generateImage,
   generateVideo,
   executor,
+  solana,
 };
