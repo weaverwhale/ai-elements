@@ -1,3 +1,4 @@
+import { tool } from 'ai';
 import { moby } from './moby';
 import { urbanDictionary } from './urbanDictionary';
 import { chartGenerator } from './chartGenerator';
@@ -13,7 +14,8 @@ import { generateVideo } from './generateVideo';
 import { executor } from './executor';
 import { solana } from './solana';
 
-export const tools = {
+// Original tools with metadata (for API endpoints, prompts, etc.)
+export const toolsMetadata = {
   moby,
   urbanDictionary,
   chartGenerator,
@@ -30,19 +32,46 @@ export const tools = {
   solana,
 };
 
+// Convert tools to AI SDK format
+function createAISDKTool(toolDef: any) {
+  return tool({
+    description: toolDef.description,
+    inputSchema: toolDef.inputSchema,
+    execute: toolDef.execute,
+  });
+}
+
+// AI SDK compatible tools
+export const tools = {
+  moby: createAISDKTool(moby),
+  urbanDictionary: createAISDKTool(urbanDictionary),
+  chartGenerator: createAISDKTool(chartGenerator),
+  forecast: createAISDKTool(forecast),
+  wikipedia: createAISDKTool(wikipedia),
+  weeklyReport: createAISDKTool(weeklyReport),
+  memory: createAISDKTool(memory),
+  generativeUi: createAISDKTool(generativeUi),
+  webSearch: createAISDKTool(webSearch),
+  operator: createAISDKTool(operator),
+  generateImage: createAISDKTool(generateImage),
+  generateVideo: createAISDKTool(generateVideo),
+  executor: createAISDKTool(executor),
+  solana: createAISDKTool(solana),
+};
+
 export const geminiTools = {
-  moby,
-  urbanDictionary,
+  moby: createAISDKTool(moby),
+  urbanDictionary: createAISDKTool(urbanDictionary),
   // chartGenerator,
-  forecast,
-  wikipedia,
-  weeklyReport,
-  memory,
-  generativeUi,
-  webSearch,
-  operator,
-  generateImage,
-  generateVideo,
-  executor,
-  solana,
+  forecast: createAISDKTool(forecast),
+  wikipedia: createAISDKTool(wikipedia),
+  weeklyReport: createAISDKTool(weeklyReport),
+  memory: createAISDKTool(memory),
+  generativeUi: createAISDKTool(generativeUi),
+  webSearch: createAISDKTool(webSearch),
+  operator: createAISDKTool(operator),
+  generateImage: createAISDKTool(generateImage),
+  generateVideo: createAISDKTool(generateVideo),
+  executor: createAISDKTool(executor),
+  solana: createAISDKTool(solana),
 };

@@ -1,4 +1,4 @@
-import { tools } from './tools';
+import { toolsMetadata } from './tools';
 
 export const defaultSystemPrompt = `
 # Introduction
@@ -12,7 +12,7 @@ The date and time are ${new Date().toLocaleDateString()}
 
 ## Tools
 You have access to the following tools:
-${Object.values(tools)
+${Object.values(toolsMetadata)
   .map((tool) => `- ${tool.name} (${tool.id}): ${tool.description}`)
   .join('\n')}
 

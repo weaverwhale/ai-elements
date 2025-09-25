@@ -78,6 +78,13 @@ export const modelProviders: ModelProvider[] = [
     model: anthropic('claude-sonnet-4-20250514'),
     defaultSystemPrompt,
   },
+  {
+    id: 'claude-4.1-opus',
+    name: 'Claude 4.1 Opus (Anthropic)',
+    available: checkApiKey(process.env.ANTHROPIC_API_KEY, 'ANTHROPIC'),
+    model: anthropic('claude-4.1-opus'),
+    defaultSystemPrompt,
+  },
   // {
   //   id: 'groq-qwen-2.5-32b',
   //   name: 'Qwen 2.5 32B (Groq)',

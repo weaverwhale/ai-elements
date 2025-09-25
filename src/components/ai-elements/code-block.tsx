@@ -5,11 +5,7 @@ import { cn } from '@/lib/utils';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-// @ts-ignore
-import atomOneDark from 'react-syntax-highlighter/dist/styles/atom-one-dark';
-// @ts-ignore
-import atomOneLight from 'react-syntax-highlighter/dist/styles/atom-one-light';
+import { codeToHtml } from 'shiki';
 import { useTheme } from '@/components/theme-provider';
 
 type CodeBlockContextType = {
@@ -37,6 +33,7 @@ export const CodeBlock = ({
 }: CodeBlockProps) => {
   const { theme } = useTheme();
   const [isDark, setIsDark] = useState(false);
+  const [highlightedCode, setHighlightedCode] = useState<string>('');
 
   useEffect(() => {
     const updateTheme = () => {
@@ -59,6 +56,42 @@ export const CodeBlock = ({
     }
   }, [theme]);
 
+  useEffect(() => {
+    const highlightCode = async () => {
+      try {
+        const html = await codeToHtml(code, {
+          lang: language,
+          theme: isDark ? 'dark-plus' : 'light-plus',
+          transformers: showLineNumbers
+            ? [
+                {
+                  name: 'line-numbers',
+                  line(node, line) {
+                    node.children.unshift({
+                      type: 'element',
+                      tagName: 'span',
+                      properties: {
+                        class: 'line-number',
+                        style:
+                          'color: hsl(var(--muted-foreground)); padding-right: 1rem; min-width: 2.5rem; display: inline-block;',
+                      },
+                      children: [{ type: 'text', value: line.toString() }],
+                    });
+                  },
+                },
+              ]
+            : undefined,
+        });
+        setHighlightedCode(html);
+      } catch (error) {
+        console.error('Error highlighting code:', error);
+        setHighlightedCode(`<pre><code>${code}</code></pre>`);
+      }
+    };
+
+    highlightCode();
+  }, [code, language, isDark, showLineNumbers]);
+
   return (
     <CodeBlockContext.Provider value={{ code }}>
       <div
@@ -69,29 +102,17 @@ export const CodeBlock = ({
         {...props}
       >
         <div className="relative">
-          <SyntaxHighlighter
+          <div
             className="overflow-hidden"
-            codeTagProps={{
-              className: 'font-mono text-sm',
-            }}
-            customStyle={{
+            style={{
               margin: 0,
               padding: '1rem',
               fontSize: '0.875rem',
               background: 'hsl(var(--background))',
               color: 'hsl(var(--foreground))',
             }}
-            language={language}
-            lineNumberStyle={{
-              color: 'hsl(var(--muted-foreground))',
-              paddingRight: '1rem',
-              minWidth: '2.5rem',
-            }}
-            showLineNumbers={showLineNumbers}
-            style={isDark ? atomOneDark : atomOneLight}
-          >
-            {code}
-          </SyntaxHighlighter>
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+          />
           {children && (
             <div className="absolute top-2 right-2 flex items-center gap-2">{children}</div>
           )}

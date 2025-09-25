@@ -19,6 +19,7 @@ const webSearch = {
       model: openai.responses('gpt-4o-mini'),
       prompt: prompt,
       tools: {
+        // @ts-ignore
         web_search_preview: openai.tools.webSearchPreview({
           searchContextSize: 'medium',
         }),

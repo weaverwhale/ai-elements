@@ -8,14 +8,7 @@ import {
   sendAndConfirmTransaction,
   clusterApiUrl,
 } from '@solana/web3.js';
-import {
-  TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress,
-  createAssociatedTokenAccountInstruction,
-  createTransferInstruction,
-  getAccount,
-  TokenAccountNotFoundError,
-} from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, Token } from '@solana/spl-token';
 import { z } from 'zod';
 
 // Types for Solana operations
@@ -175,11 +168,11 @@ async function sendSol(
 
     // Add memo if provided
     if (memo) {
-      const memoInstruction = new Transaction().add({
+      const memoInstruction = {
         keys: [],
-        programId: new PublicKey(process),
+        programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
         data: Buffer.from(memo, 'utf8'),
-      });
+      };
       transaction.add(memoInstruction);
     }
 
@@ -230,31 +223,28 @@ async function getTokenBalance(
     const mintPubKey = new PublicKey(tokenMint);
 
     // Get the associated token account address
-    const associatedTokenAddress = await getAssociatedTokenAddress(mintPubKey, walletPubKey);
+    const associatedTokenAddress = await Token.getAssociatedTokenAddress(
+      TOKEN_PROGRAM_ID,
+      TOKEN_PROGRAM_ID,
+      mintPubKey,
+      walletPubKey,
+    );
 
     try {
       // Get the token account info
-      const tokenAccount = await getAccount(connection, associatedTokenAddress);
+      const tokenAccount = await connection.getTokenAccountBalance(associatedTokenAddress);
 
-      // Get mint info to get decimals
-      const mintInfo = await connection.getParsedAccountInfo(mintPubKey);
-      const decimals =
-        (mintInfo.value?.data as { parsed?: { info?: { decimals?: number } } })?.parsed?.info
-          ?.decimals || 0;
-
-      const balance = Number(tokenAccount.amount);
-      const uiAmount = balance / Math.pow(10, decimals);
+      const balance = Number(tokenAccount.value.amount);
+      const uiAmountFromAPI = tokenAccount.value.uiAmount || 0;
+      const decimals = tokenAccount.value.decimals;
 
       return {
         balance,
         decimals,
-        uiAmount,
+        uiAmount: uiAmountFromAPI,
       };
-    } catch (error) {
-      if (error instanceof TokenAccountNotFoundError) {
-        return { balance: 0, decimals: 0, uiAmount: 0 };
-      }
-      throw error;
+    } catch {
+      return { balance: 0, decimals: 0, uiAmount: 0 };
     }
   } catch (error) {
     throw new Error(
@@ -331,41 +321,49 @@ async function sendTokens(
     const mintPubKey = new PublicKey(tokenMint);
 
     // Get associated token addresses
-    const senderTokenAddress = await getAssociatedTokenAddress(mintPubKey, senderKeypair.publicKey);
+    const senderTokenAddress = await Token.getAssociatedTokenAddress(
+      TOKEN_PROGRAM_ID,
+      TOKEN_PROGRAM_ID,
+      mintPubKey,
+      senderKeypair.publicKey,
+    );
 
-    const recipientTokenAddress = await getAssociatedTokenAddress(mintPubKey, recipientPubKey);
+    const recipientTokenAddress = await Token.getAssociatedTokenAddress(
+      TOKEN_PROGRAM_ID,
+      TOKEN_PROGRAM_ID,
+      mintPubKey,
+      recipientPubKey,
+    );
 
     const transaction = new Transaction();
 
     // Check if recipient token account exists, create if not
     try {
-      await getAccount(connection, recipientTokenAddress);
-    } catch (error) {
-      if (error instanceof TokenAccountNotFoundError) {
-        // Add instruction to create associated token account
-        transaction.add(
-          createAssociatedTokenAccountInstruction(
-            senderKeypair.publicKey, // payer
-            recipientTokenAddress,
-            recipientPubKey, // owner
-            mintPubKey, // mint
-          ),
-        );
-      } else {
-        throw error;
-      }
+      await connection.getTokenAccountBalance(recipientTokenAddress);
+    } catch {
+      // Token account doesn't exist, create it
+      transaction.add(
+        Token.createAssociatedTokenAccountInstruction(
+          TOKEN_PROGRAM_ID,
+          TOKEN_PROGRAM_ID,
+          mintPubKey,
+          recipientTokenAddress,
+          recipientPubKey,
+          senderKeypair.publicKey,
+        ),
+      );
     }
 
     // Add transfer instruction
     const transferAmount = amount * Math.pow(10, decimals);
     transaction.add(
-      createTransferInstruction(
+      Token.createTransferInstruction(
+        TOKEN_PROGRAM_ID,
         senderTokenAddress,
         recipientTokenAddress,
         senderKeypair.publicKey,
-        transferAmount,
         [],
-        TOKEN_PROGRAM_ID,
+        transferAmount,
       ),
     );
 
@@ -735,40 +733,48 @@ async function estimateTransactionFee(
       const decimals = tokenInfo.decimals;
 
       // Get associated token addresses
-      const senderTokenAddress = await getAssociatedTokenAddress(mintPubKey, senderPubKey);
-      const recipientTokenAddress = await getAssociatedTokenAddress(mintPubKey, recipientPubKey);
+      const senderTokenAddress = await Token.getAssociatedTokenAddress(
+        TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
+        mintPubKey,
+        senderPubKey,
+      );
+      const recipientTokenAddress = await Token.getAssociatedTokenAddress(
+        TOKEN_PROGRAM_ID,
+        TOKEN_PROGRAM_ID,
+        mintPubKey,
+        recipientPubKey,
+      );
 
       // Check if recipient token account exists
       try {
-        await getAccount(connection, recipientTokenAddress);
-      } catch (error) {
-        if (error instanceof TokenAccountNotFoundError) {
-          // Add instruction to create associated token account
-          transaction.add(
-            createAssociatedTokenAccountInstruction(
-              senderPubKey, // payer
-              recipientTokenAddress,
-              recipientPubKey, // owner
-              mintPubKey, // mint
-            ),
-          );
-          includesTokenAccountCreation = true;
-          accountCreationFee = await connection.getMinimumBalanceForRentExemption(165); // Token account size
-        } else {
-          throw error;
-        }
+        await connection.getTokenAccountBalance(recipientTokenAddress);
+      } catch {
+        // Token account doesn't exist, create it
+        transaction.add(
+          Token.createAssociatedTokenAccountInstruction(
+            TOKEN_PROGRAM_ID,
+            TOKEN_PROGRAM_ID,
+            mintPubKey,
+            recipientTokenAddress,
+            recipientPubKey,
+            senderPubKey,
+          ),
+        );
+        includesTokenAccountCreation = true;
+        accountCreationFee = await connection.getMinimumBalanceForRentExemption(165); // Token account size
       }
 
       // Add transfer instruction
       const transferAmount = amount * Math.pow(10, decimals);
       transaction.add(
-        createTransferInstruction(
+        Token.createTransferInstruction(
+          TOKEN_PROGRAM_ID,
           senderTokenAddress,
           recipientTokenAddress,
           senderPubKey,
-          transferAmount,
           [],
-          TOKEN_PROGRAM_ID,
+          transferAmount,
         ),
       );
     } else {
