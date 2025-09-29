@@ -86,6 +86,20 @@ export const modelProviders: ModelProvider[] = [
     defaultSystemPrompt,
   },
   // {
+  //   id: 'claude-brocade-eap',
+  //   name: 'Claude Brocade EAP (Anthropic)',
+  //   available: checkApiKey(process.env.ANTHROPIC_API_KEY, 'ANTHROPIC'),
+  //   model: anthropic('claude-brocade-eap'),
+  //   defaultSystemPrompt,
+  // },
+  {
+    id: 'claude-4.5-sonnet',
+    name: 'Claude 4.5 Sonnet (Anthropic)',
+    available: checkApiKey(process.env.ANTHROPIC_API_KEY, 'ANTHROPIC'),
+    model: anthropic('claude-sonnet-4-5-20250929'),
+    defaultSystemPrompt,
+  },
+  // {
   //   id: 'groq-qwen-2.5-32b',
   //   name: 'Qwen 2.5 32B (Groq)',
   //   available: checkApiKey(process.env.GROQ_API_KEY, 'GROQ'),
