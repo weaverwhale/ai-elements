@@ -65,6 +65,13 @@ export const modelProviders: ModelProvider[] = [
     defaultSystemPrompt,
   },
   {
+    id: 'willow-alpha-2025-11-03',
+    name: 'Willow Alpha (OpenAI)',
+    available: checkApiKey(process.env.OPENAI_API_KEY, 'OPENAI'),
+    model: openai('willow-alpha-2025-11-03'),
+    defaultSystemPrompt,
+  },
+  {
     id: 'claude-3-7-sonnet',
     name: 'Claude 3.7 Sonnet (Anthropic)',
     available: checkApiKey(process.env.ANTHROPIC_API_KEY, 'ANTHROPIC'),
