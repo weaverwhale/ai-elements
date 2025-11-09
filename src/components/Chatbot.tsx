@@ -27,7 +27,7 @@ import { ModeToggleButton } from '@/components/ui/mode-toggle';
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
 import { Actions, Action } from '@/components/ai-elements/actions';
 import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning';
-import { Loader } from '@/components/ai-elements/loader';
+import { ThinkingIndicator } from '@/components/ai-elements/thinking-indicator';
 import {
   Tool,
   ToolContent,
@@ -110,7 +110,8 @@ export const Chatbot = () => {
       try {
         const conversation = await loadConversation(conversationId);
         if (conversation) {
-          setMessages(conversation.messages);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setMessages(conversation.messages as any);
           setSelectedModel(conversation.modelId);
         }
       } catch (err) {
@@ -182,37 +183,39 @@ export const Chatbot = () => {
   }, [messages, selectedModel, status, isLoadingConversation, saveConversation]);
 
   return (
-    <div className="max-w-4xl mx-auto relative size-full h-[100dvh]">
+    <div className="max-w-4xl mx-auto relative size-full h-dvh">
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
           <ConversationContent>
             {messages.map((message, index) => (
               <div key={message.id}>
-                {message.role === 'assistant' && (
-                  <Sources>
-                    {message.parts.map((part, i) => {
-                      switch (part.type) {
-                        case 'source-url':
-                          return (
-                            <>
-                              <SourcesTrigger
-                                count={
-                                  message.parts.filter((part) => part.type === 'source-url').length
-                                }
-                              />
-                              <SourcesContent key={`${message.id}-${i}`}>
-                                <Source
-                                  key={`${message.id}-${i}`}
-                                  href={part.url}
-                                  title={part.url}
+                {message.role === 'assistant' &&
+                  message.parts.find((part) => part.type === 'source-url') && (
+                    <Sources>
+                      {message.parts.map((part, i) => {
+                        switch (part.type) {
+                          case 'source-url':
+                            return (
+                              <>
+                                <SourcesTrigger
+                                  count={
+                                    message.parts.filter((part) => part.type === 'source-url')
+                                      .length
+                                  }
                                 />
-                              </SourcesContent>
-                            </>
-                          );
-                      }
-                    })}
-                  </Sources>
-                )}
+                                <SourcesContent key={`${message.id}-${i}`}>
+                                  <Source
+                                    key={`${message.id}-${i}`}
+                                    href={part.url}
+                                    title={part.url}
+                                  />
+                                </SourcesContent>
+                              </>
+                            );
+                        }
+                      })}
+                    </Sources>
+                  )}
                 <Message from={message.role} key={message.id}>
                   <MessageContent>
                     {message.parts.map((part, i) => {
@@ -299,7 +302,7 @@ export const Chatbot = () => {
                   )}
               </div>
             ))}
-            {status === 'submitted' && <Loader />}
+            {status === 'submitted' && <ThinkingIndicator />}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>

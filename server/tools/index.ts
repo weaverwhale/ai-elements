@@ -14,8 +14,15 @@ import { generateVideo } from './generateVideo';
 import { executor } from './executor';
 import { solana } from './solana';
 
+export interface ToolMetadata {
+  id: string;
+  name: string;
+  description: string;
+  // don't care about the input schema and execute function
+}
+
 // Original tools with metadata (for API endpoints, prompts, etc.)
-export const toolsMetadata = {
+export const toolsMetadata: Record<string, ToolMetadata> = {
   moby,
   urbanDictionary,
   chartGenerator,
@@ -33,6 +40,7 @@ export const toolsMetadata = {
 };
 
 // Convert tools to AI SDK format
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createAISDKTool(toolDef: any) {
   return tool({
     description: toolDef.description,

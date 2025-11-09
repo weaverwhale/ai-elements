@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { resolve, normalize } from 'path';
-import { executorSystemPrompt } from '../prompts';
+import { executorSystemPrompt } from '../utils/prompts';
 
 const execAsync = promisify(exec);
 

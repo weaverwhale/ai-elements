@@ -1,4 +1,6 @@
-import { memory } from './tools/memory';
+import { UIMessage } from 'ai';
+import { memory } from '../tools/memory';
+import { extractTextContent } from './text';
 
 /**
  * Represents a chat message
@@ -151,4 +153,113 @@ export function createChatMemoryMiddleware(options: ChatMemoryOptions = {}) {
       throw error;
     }
   };
+}
+
+// Helper function to convert UIMessage to ChatMessage
+export function convertToChatMessageFormat(messages: UIMessage[]): ChatMessage[] {
+  return messages.map((msg) => ({
+    role:
+      msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system'
+        ? msg.role
+        : 'system',
+    content: extractTextContent(msg),
+    ...(msg.id ? { id: msg.id } : {}),
+  })) as ChatMessage[];
+}
+
+// Helper function to search and filter memories
+export async function getRelevantMemories(
+  userId: string,
+  query: string,
+  recentMessages: UIMessage[],
+): Promise<string> {
+  if (userId === 'anonymous' || !query) {
+    return '';
+  }
+
+  try {
+    console.log(`[Memory] Searching for user ${userId} with query: ${query.substring(0, 50)}...`);
+
+    const memorySearchResult = await searchChatMemory(userId, query, 5);
+    let memories: { content: string }[] = [];
+
+    // Handle different response types from searchChatMemory
+    if (typeof memorySearchResult === 'string') {
+      try {
+        memories = JSON.parse(memorySearchResult);
+      } catch {
+        return '';
+      }
+    } else if (Array.isArray(memorySearchResult)) {
+      memories = memorySearchResult;
+    } else if (memorySearchResult?.results && Array.isArray(memorySearchResult.results)) {
+      memories = memorySearchResult.results;
+    }
+
+    if (!Array.isArray(memories) || memories.length === 0) {
+      return '';
+    }
+
+    // Get recent message content to avoid duplication
+    const recentContent = new Set<string>();
+    recentMessages.slice(-6).forEach((msg) => {
+      const content = extractTextContent(msg).trim();
+      if (content) recentContent.add(content);
+    });
+
+    // Filter memories
+    const filteredMemories = memories.filter((memory) => {
+      if (!memory?.content || typeof memory.content !== 'string') {
+        return false;
+      }
+
+      const contentParts = memory.content.split(': ');
+      if (contentParts.length < 2) return false;
+
+      const role = contentParts[0];
+      const content = contentParts.slice(1).join(': ').trim();
+
+      if (!content) return false;
+
+      // Skip recent duplicates
+      if (recentContent.has(content)) return false;
+
+      // Skip assistant tool responses
+      if (role === 'assistant' && (content.includes('✅') || content.includes('Calling'))) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (filteredMemories.length === 0) {
+      return '';
+    }
+
+    console.log(`[Memory] Found ${filteredMemories.length} relevant memories`);
+
+    const memoryItems = filteredMemories.map((memory) => `- ${memory.content}`).join('\n');
+
+    return `\n\nRelevant information from previous conversations:\n${memoryItems}`;
+  } catch (error) {
+    console.error('[Memory] Error searching memories:', error);
+    return '';
+  }
+}
+
+// Helper function to store chat to memory with timeout
+export async function storeToMemoryAsync(userId: string, messages: UIMessage[]): Promise<void> {
+  if (userId === 'anonymous') return;
+
+  try {
+    const chatMessages = convertToChatMessageFormat(messages);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Memory storage timeout')), 5000);
+    });
+
+    await Promise.race([storeChatToMemory(userId, chatMessages), timeoutPromise]);
+  } catch (error) {
+    console.error('[Memory] Error storing chat:', error);
+  }
 }

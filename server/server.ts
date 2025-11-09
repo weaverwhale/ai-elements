@@ -4,11 +4,12 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import { Readable } from 'stream';
+
 import { handleChatRequest } from '../server/api/chat';
 import { handleToolsRequest } from '../server/api/tools';
 import { handleSuggestionsRequest } from '../server/api/suggestions';
-import { Readable } from 'stream';
-import { getAvailableModelProviders } from './modelProviders';
+import { getAvailableModelProviders } from './utils/modelProviders';
 
 const app = express();
 const PORT = process.env.PORT || 1753;
