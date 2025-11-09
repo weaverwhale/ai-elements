@@ -104,9 +104,21 @@ const createSafeScope = () => ({
 const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
   const location = useLocation();
   const pathname = location.pathname;
+  const [isReady, setIsReady] = useState(false);
 
   // Memoize the safe scope to avoid recreation on every render
   const scope = useMemo(() => createSafeScope(), []);
+
+  // Wait for jsxString to be available before rendering
+  useEffect(() => {
+    if (jsxString && jsxString.trim()) {
+      // Small delay to ensure the component is fully mounted
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [jsxString]);
 
   const openInViewer = () => {
     // Store the JSX string in localStorage as backup
@@ -217,10 +229,25 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
     return code || 'render(<div>No content provided</div>);';
   }, [jsxString]);
 
+  // Don't render until we have valid code and component is ready
+  if (!jsxString || !jsxString.trim() || !isReady) {
+    return (
+      <div className="mb-4 border overflow-hidden rounded-md">
+        <div className="bg-muted/50 border-b px-4 py-2">
+          <span className="text-sm font-medium text-muted-foreground">Generated UI Component</span>
+        </div>
+        <div className="p-8 flex items-center justify-center">
+          <span className="text-sm text-muted-foreground">Loading component...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-4 border overflow-hidden rounded-md">
-        <LiveProvider code={cleanCode} scope={scope}>
+        {/* Add key to force re-mount when code changes */}
+        <LiveProvider key={cleanCode} code={cleanCode} scope={scope}>
           <div className="bg-muted/50 border-b px-4 py-2 flex justify-between items-center">
             <span className="text-sm font-medium text-muted-foreground">
               Generated UI Component
