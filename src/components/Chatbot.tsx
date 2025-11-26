@@ -223,7 +223,11 @@ export const Chatbot = () => {
                         case 'text': {
                           return (
                             <div key={`${message.id}-${i}`}>
-                              <Response>{part.text}</Response>
+                              <Response 
+                                isStreaming={status === 'streaming' && index === messages.length - 1}
+                              >
+                                {part.text}
+                              </Response>
                             </div>
                           );
                         }
@@ -259,7 +263,9 @@ export const Chatbot = () => {
                                   <ToolOutput
                                     output={
                                       toolPart.output ? (
-                                        <Response>
+                                        <Response
+                                          isStreaming={status === 'streaming' && index === messages.length - 1}
+                                        >
                                           {typeof toolPart.output === 'string'
                                             ? toolPart.output
                                             : JSON.stringify(toolPart.output, null, 2)}

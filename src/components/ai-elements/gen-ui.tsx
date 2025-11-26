@@ -8,6 +8,7 @@ import './gen-ui.css';
 interface GenerativeUIProps {
   jsxString: string;
   onError?: (error: Error) => void;
+  isLoading?: boolean;
 }
 
 // Error boundary component to catch runtime errors
@@ -101,7 +102,7 @@ const createSafeScope = () => ({
   clearTimeout,
 });
 
-const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
+const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError, isLoading }) => {
   const location = useLocation();
   const pathname = location.pathname;
   const [isReady, setIsReady] = useState(false);
@@ -111,14 +112,17 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError }) => {
 
   // Wait for jsxString to be available before rendering
   useEffect(() => {
-    if (jsxString && jsxString.trim()) {
+    if (jsxString && jsxString.trim() && !isLoading) {
       // Small delay to ensure the component is fully mounted
       const timer = setTimeout(() => {
         setIsReady(true);
       }, 100);
       return () => clearTimeout(timer);
+    } else if (isLoading) {
+      // Reset ready state when loading starts
+      setIsReady(false);
     }
-  }, [jsxString]);
+  }, [jsxString, isLoading]);
 
   const openInViewer = () => {
     // Store the JSX string in localStorage as backup

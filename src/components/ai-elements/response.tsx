@@ -1,19 +1,24 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { type ComponentProps, memo, type ReactNode, useState } from 'react';
+import { type ComponentProps, memo, type ReactNode, useState, createContext, useContext } from 'react';
 import { Streamdown } from 'streamdown';
 import { Button } from '@/components/ui/button';
 import { CheckIcon, CopyIcon, DownloadIcon } from 'lucide-react';
 import MermaidDiagram from './mermaid-diagram';
 import GenerativeUI from './gen-ui';
 
-type ResponseProps = ComponentProps<typeof Streamdown>;
+type ResponseProps = ComponentProps<typeof Streamdown> & {
+  isStreaming?: boolean;
+};
 
 interface CodeBlockProps {
   children?: ReactNode | { props: { className?: string; children: string } };
   className?: string;
 }
+
+// Context to pass streaming state to nested components
+const StreamingContext = createContext<{ isStreaming: boolean }>({ isStreaming: false });
 
 const hasCodeProps = (
   children: unknown,
@@ -99,6 +104,7 @@ const HoverableImage = (props: ComponentProps<'img'>) => {
 
 const CodeBlock = (props: CodeBlockProps) => {
   const { children, className: propsClassName } = props;
+  const { isStreaming } = useContext(StreamingContext);
 
   const className = hasCodeProps(children) ? children.props.className : propsClassName || '';
   const language = className ? className.replace('language-', '') : '';
@@ -109,7 +115,7 @@ const CodeBlock = (props: CodeBlockProps) => {
   }
 
   if (language === 'jsx') {
-    return <GenerativeUI jsxString={content} />;
+    return <GenerativeUI jsxString={content} isLoading={isStreaming} />;
   }
 
   return (
@@ -120,7 +126,7 @@ const CodeBlock = (props: CodeBlockProps) => {
 };
 
 export const Response = memo(
-  ({ className, ...props }: ResponseProps) => {
+  ({ className, isStreaming = false, ...props }: ResponseProps) => {
     // Convert relative image URLs to absolute URLs for Streamdown
     const processContent = (content: string) => {
       if (typeof content !== 'string') return content;
@@ -139,18 +145,22 @@ export const Response = memo(
     };
 
     return (
-      <Streamdown
-        className={cn('size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0', className)}
-        {...processedProps}
-        components={{
-          code: CodeBlock,
-          pre: CodeBlock,
-          img: HoverableImage,
-        }}
-      />
+      <StreamingContext.Provider value={{ isStreaming }}>
+        <Streamdown
+          className={cn('size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0', className)}
+          {...processedProps}
+          components={{
+            code: CodeBlock,
+            pre: CodeBlock,
+            img: HoverableImage,
+          }}
+        />
+      </StreamingContext.Provider>
     );
   },
-  (prevProps, nextProps) => prevProps.children === nextProps.children,
+  (prevProps, nextProps) => 
+    prevProps.children === nextProps.children && 
+    prevProps.isStreaming === nextProps.isStreaming,
 );
 
 Response.displayName = 'Response';

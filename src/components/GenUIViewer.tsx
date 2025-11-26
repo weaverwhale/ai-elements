@@ -124,6 +124,7 @@ export const GenUIViewer = () => {
         {jsxString ? (
           <GenerativeUI
             jsxString={jsxString}
+            isLoading={false}
             onError={(error) => {
               console.error('GenUI viewer error:', error);
             }}

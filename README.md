@@ -1,6 +1,6 @@
 # AI SDK Elements Chatbot
 
-A multi-tool chatbot built with React and the AI SDK
+A multi-tool agentic chatbot built with React and the AI SDK
 
 ## Technologies Used
 
