@@ -3,7 +3,7 @@ import { generateText, ModelMessage } from 'ai';
 import { getModelProviderById } from '../utils/modelProviders';
 import { generativeUiToolPrompt } from '../utils/prompts';
 
-const UI_GENERATION_MODEL_ID = 'claude-4-sonnet';
+const UI_GENERATION_MODEL_ID = 'claude-4.5-sonnet';
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant', 'system', 'tool']),
