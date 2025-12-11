@@ -69,13 +69,13 @@ function buildModelProviders(): ModelProvider[] {
       model: openai('gpt-5.1'),
       defaultSystemPrompt,
     },
-    // {
-    //   id: 'willow-alpha-2025-11-03',
-    //   name: 'Willow Alpha (OpenAI)',
-    //   available: checkApiKey(process.env.OPENAI_API_KEY, 'OPENAI'),
-    //   model: openai('willow-alpha-2025-11-03'),
-    //   defaultSystemPrompt,
-    // },
+    {
+      id: 'gpt-5.2',
+      name: 'GPT-5.2 (OpenAI)',
+      available: checkApiKey(process.env.OPENAI_API_KEY, 'OPENAI'),
+      model: openai('gpt-5.2'),
+      defaultSystemPrompt,
+    },
     {
       id: 'claude-4.5-sonnet',
       name: 'Claude 4.5 Sonnet (Anthropic)',
@@ -90,35 +90,6 @@ function buildModelProviders(): ModelProvider[] {
       model: anthropic('claude-4-5-opus'),
       defaultSystemPrompt,
     },
-    // {
-    //   id: 'claude-brocade-eap',
-    //   name: 'Claude Brocade EAP (Anthropic)',
-    //   available: checkApiKey(process.env.ANTHROPIC_API_KEY, 'ANTHROPIC'),
-    //   model: anthropic('claude-brocade-eap'),
-    //   defaultSystemPrompt,
-    // },
-    // {
-    //   id: 'groq-qwen-2.5-32b',
-    //   name: 'Qwen 2.5 32B (Groq)',
-    //   available: checkApiKey(process.env.GROQ_API_KEY, 'GROQ'),
-    //   model: groq('qwen-2.5-32b'),
-    //   defaultSystemPrompt,
-    // },
-    // {
-    //   id: 'groq-gemma-2-9b-it',
-    //   name: 'Gemma 2 9B (Groq)',
-    //   available: checkApiKey(process.env.GROQ_API_KEY, 'GROQ'),
-    //   model: groq('gemma2-9b-it'),
-    //   defaultSystemPrompt,
-    // },
-    // {
-    //   id: 'deepseek-chat',
-    //   name: 'DeepSeek Chat (DeepSeek)',
-    //   available: checkApiKey(process.env.DEEPSEEK_API_KEY, 'DEEPSEEK'),
-    //   model: deepseek('deepseek-chat'),
-    //   defaultSystemPrompt:
-    //     'You are a helpful AI assistant powered by DeepSeek. You can help with getting information about weather and location, and telling the current time.',
-    // },
     {
       id: 'gpt-oss-120b',
       name: 'GPT-OSS 120B (Groq)',
