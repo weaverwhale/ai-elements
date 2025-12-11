@@ -89,7 +89,84 @@ When generating components for reports, dashboards, or data visualizations:
 - Preserve the exact numbers and statistics from the conversation context
 
 ## Available in Scope (NO IMPORTS NEEDED):
-React, useState, useEffect, useMemo, console, Math, Date, JSON, Intl, setTimeout, clearTimeout
+
+### React Essentials:
+React, useState, useEffect, useMemo, useRef, useCallback
+
+### Utilities:
+console, Math, Date, JSON, Intl, setTimeout, clearTimeout, parseInt, parseFloat, Number, String, Array, Object, Promise
+
+### Dynamic Library Loading:
+- **loadScript(url)** - Load external JS from CDN, returns Promise
+- **loadCSS(url)** - Load external CSS from CDN, returns Promise
+- **window** - Access to window object for loaded libraries
+
+## Loading External Libraries (Three.js, Chart.js, D3, etc.)
+Use loadScript() to dynamically load any library from CDN, then access via window:
+
+\`\`\`jsx
+const ThreeScene = () => {
+  const containerRef = useRef(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    loadScript('https://unpkg.com/three@0.160.0/build/three.min.js')
+      .then(() => {
+        setIsLoaded(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !containerRef.current) return;
+    
+    const THREE = window.THREE;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    containerRef.current.appendChild(renderer.domElement);
+    
+    // Add objects, lights, animation loop...
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshStandardMaterial({ color: 0x6366f1 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
+    
+    camera.position.z = 5;
+    
+    const animate = () => {
+      requestAnimationFrame(animate);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    };
+    animate();
+    
+    return () => {
+      renderer.dispose();
+      containerRef.current?.removeChild(renderer.domElement);
+    };
+  }, [isLoaded]);
+
+  if (!isLoaded) return <div className="p-8 text-center">Loading 3D scene...</div>;
+  
+  return <div ref={containerRef} className="w-full h-[500px] rounded-xl overflow-hidden" />;
+};
+\`\`\`
+
+### Popular CDN URLs:
+- Three.js: https://unpkg.com/three@0.160.0/build/three.min.js
+- Chart.js: https://unpkg.com/chart.js@4.4.1/dist/chart.umd.js
+- D3.js: https://unpkg.com/d3@7.8.5/dist/d3.min.js
+- Anime.js: https://unpkg.com/animejs@3.2.2/lib/anime.min.js
+- GSAP: https://unpkg.com/gsap@3.12.4/dist/gsap.min.js
+- Leaflet: https://unpkg.com/leaflet@1.9.4/dist/leaflet.js (also load leaflet.css)
+- Plotly: https://unpkg.com/plotly.js-dist@2.27.1/plotly.js
 
 ## Design Requirements:
 - **Modern & Beautiful**: Contemporary design, clean layouts, proper visual hierarchy
@@ -110,17 +187,17 @@ React, useState, useEffect, useMemo, console, Math, Date, JSON, Intl, setTimeout
 - **USE REAL DATA** - Extract actual numbers, values, and data from the conversation context
 - **SELF-CONTAINED** - No props, no imports, but use real data from conversation
 - **COMPLETE FUNCTIONALITY** - Everything in one component
+- **LOADING STATE** - When using external libraries, show a loading state while script loads
 
 ### WRONG (Causes ReferenceError):
 \`\`\`jsx
 const App = () => <UndefinedComponent />; // ❌ References undefined component
 \`\`\`
 
-### CORRECT:
+### CORRECT (Standard UI):
 \`\`\`jsx
 const Dashboard = () => {
   // Use actual data from conversation context - DO NOT hardcode fake examples
-  // Extract real numbers, dates, values from the user's data/reports
   const data = [/* real data from conversation */];
   
   return (

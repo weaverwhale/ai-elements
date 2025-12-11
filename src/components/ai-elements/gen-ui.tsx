@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router';
 import { LiveProvider, LiveError, LivePreview } from 'react-live';
 import { Button } from '@/components/ui/button';
@@ -51,6 +51,39 @@ class ComponentErrorBoundary extends React.Component<
   }
 }
 
+// Helper to load external scripts dynamically
+const loadScript = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // Check if script already loaded
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+};
+
+// Helper to load CSS dynamically
+const loadCSS = (href: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`link[href="${href}"]`)) {
+      resolve();
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => reject(new Error(`Failed to load CSS: ${href}`));
+    document.head.appendChild(link);
+  });
+};
+
 // Safe scope - only these imports/functions are available to generated components
 const createSafeScope = () => ({
   // React essentials
@@ -58,6 +91,8 @@ const createSafeScope = () => ({
   useState,
   useEffect,
   useMemo,
+  useRef,
+  useCallback,
 
   // React-live render function (this is provided by LiveProvider)
   render: (element: React.ReactElement) => element,
@@ -100,6 +135,16 @@ const createSafeScope = () => ({
     }
   },
   clearTimeout,
+
+  // Dynamic loading utilities for external libraries
+  loadScript,
+  loadCSS,
+
+  // Window access for loaded libraries (Three.js, etc.)
+  window: typeof window !== 'undefined' ? window : {},
+
+  // Promise for async operations
+  Promise,
 });
 
 const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError, isLoading }) => {
