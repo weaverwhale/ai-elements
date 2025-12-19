@@ -90,7 +90,10 @@ function saveMetadata() {
 type Embedder = {
   (
     text: string,
-    options: { pooling: 'none' | 'mean' | 'cls' | undefined; normalize: boolean },
+    options: {
+      pooling: 'none' | 'mean' | 'cls' | undefined;
+      normalize: boolean;
+    }
   ): Promise<{ data?: unknown }>;
 };
 let embedder: Embedder | null = null;
@@ -100,7 +103,10 @@ async function getEmbedder() {
     console.log('[MEMORY] Initializing embedding model...');
     try {
       // Using a smaller, faster model for embeddings
-      embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+      embedder = await pipeline(
+        'feature-extraction',
+        'Xenova/all-MiniLM-L6-v2'
+      );
       console.log('[MEMORY] Embedding model initialized');
     } catch (error) {
       console.error('[MEMORY] Error initializing embedding model:', error);
@@ -133,7 +139,7 @@ async function generateEmbedding(text: string): Promise<number[]> {
 async function saveMemory(
   userId: string,
   content: string,
-  source: string = 'chat',
+  source: string = 'chat'
 ): Promise<string> {
   try {
     // Generate a unique ID for this memory
@@ -184,7 +190,7 @@ async function saveMemory(
 async function searchMemories(
   userId: string,
   query: string,
-  limit: number = 5,
+  limit: number = 5
 ): Promise<MemoryData[]> {
   try {
     // Generate embedding for query
@@ -214,7 +220,9 @@ async function searchMemories(
     }
 
     // Sort by similarity and limit results
-    return memoryResults.sort((a, b) => (b.similarity || 0) - (a.similarity || 0)).slice(0, limit);
+    return memoryResults
+      .sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+      .slice(0, limit);
   } catch (error) {
     console.error('[MEMORY] Error searching memories:', error);
     return [];
@@ -238,7 +246,10 @@ function findMemoryIdByIndex(userId: string, index: number): string | null {
 }
 
 // Memory update function
-async function updateMemory(memoryId: string, newContent: string): Promise<boolean> {
+async function updateMemory(
+  memoryId: string,
+  newContent: string
+): Promise<boolean> {
   try {
     // Get the existing memory
     const memory = metadata.memories[memoryId];
@@ -298,12 +309,13 @@ type MemoryParams = {
 const memory = {
   id: 'memory',
   name: 'Memory',
-  description: 'Store and search user conversation history and memories using vector embeddings',
+  description:
+    'Store and search user conversation history and memories using vector embeddings',
   inputSchema: z.object({
     operation: z
       .enum(['store', 'search', 'update'])
       .describe(
-        'Operation to perform: store a new memory, search for memories, or update existing memory',
+        'Operation to perform: store a new memory, search for memories, or update existing memory'
       ),
     userId: z.string().describe('Unique identifier for the user'),
     content: z.string().describe('Content to store or query to search for'),
@@ -314,9 +326,17 @@ const memory = {
     limit: z
       .number()
       .optional()
-      .describe('Maximum number of results to return when searching (default: 5)'),
+      .describe(
+        'Maximum number of results to return when searching (default: 5)'
+      ),
   }),
-  execute: async ({ operation, userId, content, memoryId, limit = 5 }: MemoryParams) => {
+  execute: async ({
+    operation,
+    userId,
+    content,
+    memoryId,
+    limit = 5,
+  }: MemoryParams) => {
     console.log(`[MEMORY] Executing memory tool with operation: ${operation}`);
 
     try {
@@ -347,7 +367,9 @@ const memory = {
           updated = await updateMemory(memoryId, content);
           return JSON.stringify({
             success: updated,
-            message: updated ? 'Memory updated successfully' : 'Failed to update memory',
+            message: updated
+              ? 'Memory updated successfully'
+              : 'Failed to update memory',
           });
 
         default:

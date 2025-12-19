@@ -1,7 +1,14 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { type ComponentProps, memo, type ReactNode, useState, createContext, useContext } from 'react';
+import {
+  type ComponentProps,
+  memo,
+  type ReactNode,
+  useState,
+  createContext,
+  useContext,
+} from 'react';
 import { Streamdown } from 'streamdown';
 import { Button } from '@/components/ui/button';
 import { CheckIcon, CopyIcon, DownloadIcon } from 'lucide-react';
@@ -18,12 +25,19 @@ interface CodeBlockProps {
 }
 
 // Context to pass streaming state to nested components
-const StreamingContext = createContext<{ isStreaming: boolean }>({ isStreaming: false });
+const StreamingContext = createContext<{ isStreaming: boolean }>({
+  isStreaming: false,
+});
 
 const hasCodeProps = (
-  children: unknown,
+  children: unknown
 ): children is { props: { className?: string; children: string } } => {
-  return !!(children && typeof children === 'object' && 'props' in children && children.props);
+  return !!(
+    children &&
+    typeof children === 'object' &&
+    'props' in children &&
+    children.props
+  );
 };
 
 const HoverableImage = (props: ComponentProps<'img'>) => {
@@ -31,7 +45,11 @@ const HoverableImage = (props: ComponentProps<'img'>) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const copyToClipboard = async () => {
-    if (!props.src || typeof window === 'undefined' || !navigator.clipboard.writeText) {
+    if (
+      !props.src ||
+      typeof window === 'undefined' ||
+      !navigator.clipboard.writeText
+    ) {
       return;
     }
 
@@ -106,9 +124,13 @@ const CodeBlock = (props: CodeBlockProps) => {
   const { children, className: propsClassName } = props;
   const { isStreaming } = useContext(StreamingContext);
 
-  const className = hasCodeProps(children) ? children.props.className : propsClassName || '';
+  const className = hasCodeProps(children)
+    ? children.props.className
+    : propsClassName || '';
   const language = className ? className.replace('language-', '') : '';
-  const content = hasCodeProps(children) ? children.props.children : String(children || '');
+  const content = hasCodeProps(children)
+    ? children.props.children
+    : String(children || '');
 
   if (language === 'mermaid') {
     return <MermaidDiagram chart={content} />;
@@ -132,22 +154,30 @@ export const Response = memo(
       if (typeof content !== 'string') return content;
 
       // Replace relative /uploads/ paths with absolute URLs
-      return content.replace(/!\[([^\]]*)\]\(\/uploads\/([^)]+)\)/g, (_, alt, filename) => {
-        const absoluteUrl = `${window.location.origin}/uploads/${filename}`;
-        return `![${alt}](${absoluteUrl})`;
-      });
+      return content.replace(
+        /!\[([^\]]*)\]\(\/uploads\/([^)]+)\)/g,
+        (_, alt, filename) => {
+          const absoluteUrl = `${window.location.origin}/uploads/${filename}`;
+          return `![${alt}](${absoluteUrl})`;
+        }
+      );
     };
 
     const processedProps = {
       ...props,
       children:
-        typeof props.children === 'string' ? processContent(props.children) : props.children,
+        typeof props.children === 'string'
+          ? processContent(props.children)
+          : props.children,
     };
 
     return (
       <StreamingContext.Provider value={{ isStreaming }}>
         <Streamdown
-          className={cn('size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0', className)}
+          className={cn(
+            'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+            className
+          )}
           {...processedProps}
           components={{
             code: CodeBlock,
@@ -158,9 +188,9 @@ export const Response = memo(
       </StreamingContext.Provider>
     );
   },
-  (prevProps, nextProps) => 
-    prevProps.children === nextProps.children && 
-    prevProps.isStreaming === nextProps.isStreaming,
+  (prevProps, nextProps) =>
+    prevProps.children === nextProps.children &&
+    prevProps.isStreaming === nextProps.isStreaming
 );
 
 Response.displayName = 'Response';

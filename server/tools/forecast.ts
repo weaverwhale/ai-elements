@@ -11,10 +11,18 @@ type ForecastParams = {
 const forecast = {
   id: 'forecast',
   name: 'Forecast',
-  description: 'Useful for forecasting future values based on time series analysis',
+  description:
+    'Useful for forecasting future values based on time series analysis',
   inputSchema: z.object({
-    data: z.array(z.number()).describe('Array of numerical time series data points'),
-    periods: z.number().min(1).max(12).default(5).describe('Number of periods to forecast (1-12)'),
+    data: z
+      .array(z.number())
+      .describe('Array of numerical time series data points'),
+    periods: z
+      .number()
+      .min(1)
+      .max(12)
+      .default(5)
+      .describe('Number of periods to forecast (1-12)'),
     interval: z
       .enum(['days', 'weeks', 'months'])
       .default('days')
@@ -28,7 +36,7 @@ const forecast = {
     });
 
     try {
-      if (data.some((val) => !Number.isFinite(val))) {
+      if (data.some(val => !Number.isFinite(val))) {
         throw new Error('Invalid data points detected');
       }
 
@@ -37,7 +45,7 @@ const forecast = {
         regression.linear(points),
         regression.polynomial(points, { order: 2 }),
         regression.logarithmic(points),
-      ].filter((model) => Number.isFinite(model.r2));
+      ].filter(model => Number.isFinite(model.r2));
 
       if (models.length === 0) {
         throw new Error('No valid regression models found');
@@ -52,7 +60,7 @@ const forecast = {
 
       const residuals = points.map(([x, y]) => y - bestModel.predict(x)[1]);
       const standardError = Math.sqrt(
-        residuals.reduce((a, b) => a + b * b, 0) / (points.length - 2),
+        residuals.reduce((a, b) => a + b * b, 0) / (points.length - 2)
       );
       const confidenceInterval = standardError * 1.96;
 
@@ -64,8 +72,8 @@ const forecast = {
         ${forecast.join(', ')}
 
       2. Confidence Intervals (95%):
-        Lower: ${forecast.map((val) => Number((val - confidenceInterval).toFixed(2))).join(', ')}
-        Upper: ${forecast.map((val) => Number((val + confidenceInterval).toFixed(2))).join(', ')}
+        Lower: ${forecast.map(val => Number((val - confidenceInterval).toFixed(2))).join(', ')}
+        Upper: ${forecast.map(val => Number((val + confidenceInterval).toFixed(2))).join(', ')}
 
       3. Model Information:
         Type: ${bestModel.string}

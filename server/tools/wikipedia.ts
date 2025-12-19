@@ -30,7 +30,8 @@ const wikipedia = {
       const result = data.extract || 'No summary found';
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.error('Error fetching from Wikipedia:', error);
       // Return error message immediately
       return `Error: Could not fetch Wikipedia summary - ${errorMessage}`;

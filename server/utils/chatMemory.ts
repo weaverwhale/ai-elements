@@ -45,14 +45,16 @@ const defaultOptions: ChatMemoryOptions = {
 export async function storeChatToMemory(
   userId: string,
   messages: ChatMessage[],
-  options: ChatMemoryOptions = {},
+  options: ChatMemoryOptions = {}
 ): Promise<string[]> {
   // Merge with default options
   const opts = { ...defaultOptions, ...options };
   const memoryIds: string[] = [];
 
   try {
-    console.log(`[CHAT_MEMORY] Storing ${messages.length} messages for user ${userId}`);
+    console.log(
+      `[CHAT_MEMORY] Storing ${messages.length} messages for user ${userId}`
+    );
 
     // Process each message
     for (const message of messages) {
@@ -90,11 +92,15 @@ export async function storeChatToMemory(
       if (response.success && response.memoryId) {
         memoryIds.push(response.memoryId);
       } else {
-        console.error(`[CHAT_MEMORY] Failed to store message: ${JSON.stringify(message)}`);
+        console.error(
+          `[CHAT_MEMORY] Failed to store message: ${JSON.stringify(message)}`
+        );
       }
     }
 
-    console.log(`[CHAT_MEMORY] Successfully stored ${memoryIds.length} messages`);
+    console.log(
+      `[CHAT_MEMORY] Successfully stored ${memoryIds.length} messages`
+    );
     return memoryIds;
   } catch (error) {
     console.error('[CHAT_MEMORY] Error storing chat messages:', error);
@@ -110,9 +116,15 @@ export async function storeChatToMemory(
  * @param limit Maximum number of results to return
  * @returns Array of relevant chat messages with similarity scores
  */
-export async function searchChatMemory(userId: string, query: string, limit: number = 5) {
+export async function searchChatMemory(
+  userId: string,
+  query: string,
+  limit: number = 5
+) {
   try {
-    console.log(`[CHAT_MEMORY] Searching for "${query}" in chat history for user ${userId}`);
+    console.log(
+      `[CHAT_MEMORY] Searching for "${query}" in chat history for user ${userId}`
+    );
 
     const result = await memory.execute({
       operation: 'search',
@@ -125,7 +137,10 @@ export async function searchChatMemory(userId: string, query: string, limit: num
     if (response.success && response.results) {
       return response.results;
     } else {
-      console.error('[CHAT_MEMORY] Search failed:', response.error || 'Unknown error');
+      console.error(
+        '[CHAT_MEMORY] Search failed:',
+        response.error || 'Unknown error'
+      );
       return [];
     }
   } catch (error) {
@@ -139,11 +154,15 @@ export async function searchChatMemory(userId: string, query: string, limit: num
  * This can be used as a middleware in your chat handling logic
  */
 export function createChatMemoryMiddleware(options: ChatMemoryOptions = {}) {
-  return async (userId: string, messages: ChatMessage[], next: () => Promise<unknown>) => {
+  return async (
+    userId: string,
+    messages: ChatMessage[],
+    next: () => Promise<unknown>
+  ) => {
     try {
       // Store messages in memory (don't await to avoid blocking)
-      storeChatToMemory(userId, messages, options).catch((err) =>
-        console.error('[CHAT_MEMORY] Background memory storage failed:', err),
+      storeChatToMemory(userId, messages, options).catch(err =>
+        console.error('[CHAT_MEMORY] Background memory storage failed:', err)
       );
 
       // Continue with the normal chat flow
@@ -156,8 +175,10 @@ export function createChatMemoryMiddleware(options: ChatMemoryOptions = {}) {
 }
 
 // Helper function to convert UIMessage to ChatMessage
-export function convertToChatMessageFormat(messages: UIMessage[]): ChatMessage[] {
-  return messages.map((msg) => ({
+export function convertToChatMessageFormat(
+  messages: UIMessage[]
+): ChatMessage[] {
+  return messages.map(msg => ({
     role:
       msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system'
         ? msg.role
@@ -171,14 +192,16 @@ export function convertToChatMessageFormat(messages: UIMessage[]): ChatMessage[]
 export async function getRelevantMemories(
   userId: string,
   query: string,
-  recentMessages: UIMessage[],
+  recentMessages: UIMessage[]
 ): Promise<string> {
   if (userId === 'anonymous' || !query) {
     return '';
   }
 
   try {
-    console.log(`[Memory] Searching for user ${userId} with query: ${query.substring(0, 50)}...`);
+    console.log(
+      `[Memory] Searching for user ${userId} with query: ${query.substring(0, 50)}...`
+    );
 
     const memorySearchResult = await searchChatMemory(userId, query, 5);
     let memories: { content: string }[] = [];
@@ -192,7 +215,10 @@ export async function getRelevantMemories(
       }
     } else if (Array.isArray(memorySearchResult)) {
       memories = memorySearchResult;
-    } else if (memorySearchResult?.results && Array.isArray(memorySearchResult.results)) {
+    } else if (
+      memorySearchResult?.results &&
+      Array.isArray(memorySearchResult.results)
+    ) {
       memories = memorySearchResult.results;
     }
 
@@ -202,13 +228,13 @@ export async function getRelevantMemories(
 
     // Get recent message content to avoid duplication
     const recentContent = new Set<string>();
-    recentMessages.slice(-6).forEach((msg) => {
+    recentMessages.slice(-6).forEach(msg => {
       const content = extractTextContent(msg).trim();
       if (content) recentContent.add(content);
     });
 
     // Filter memories
-    const filteredMemories = memories.filter((memory) => {
+    const filteredMemories = memories.filter(memory => {
       if (!memory?.content || typeof memory.content !== 'string') {
         return false;
       }
@@ -225,7 +251,10 @@ export async function getRelevantMemories(
       if (recentContent.has(content)) return false;
 
       // Skip assistant tool responses
-      if (role === 'assistant' && (content.includes('✅') || content.includes('Calling'))) {
+      if (
+        role === 'assistant' &&
+        (content.includes('✅') || content.includes('Calling'))
+      ) {
         return false;
       }
 
@@ -238,7 +267,9 @@ export async function getRelevantMemories(
 
     console.log(`[Memory] Found ${filteredMemories.length} relevant memories`);
 
-    const memoryItems = filteredMemories.map((memory) => `- ${memory.content}`).join('\n');
+    const memoryItems = filteredMemories
+      .map(memory => `- ${memory.content}`)
+      .join('\n');
 
     return `\n\nRelevant information from previous conversations:\n${memoryItems}`;
   } catch (error) {
@@ -248,7 +279,10 @@ export async function getRelevantMemories(
 }
 
 // Helper function to store chat to memory with timeout
-export async function storeToMemoryAsync(userId: string, messages: UIMessage[]): Promise<void> {
+export async function storeToMemoryAsync(
+  userId: string,
+  messages: UIMessage[]
+): Promise<void> {
   if (userId === 'anonymous') return;
 
   try {
@@ -258,7 +292,10 @@ export async function storeToMemoryAsync(userId: string, messages: UIMessage[]):
       setTimeout(() => reject(new Error('Memory storage timeout')), 5000);
     });
 
-    await Promise.race([storeChatToMemory(userId, chatMessages), timeoutPromise]);
+    await Promise.race([
+      storeChatToMemory(userId, chatMessages),
+      timeoutPromise,
+    ]);
   } catch (error) {
     console.error('[Memory] Error storing chat:', error);
   }

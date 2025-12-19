@@ -10,8 +10,14 @@ interface UseConversationsResult {
   currentConversation: SavedConversation | null;
   currentConversationId: string | null;
   isLoadingConversation: boolean;
-  saveConversation: (messages: UIMessage[], modelId: string, title?: string) => Promise<string>;
-  loadConversation: (conversationId: string) => Promise<SavedConversation | null>;
+  saveConversation: (
+    messages: UIMessage[],
+    modelId: string,
+    title?: string
+  ) => Promise<string>;
+  loadConversation: (
+    conversationId: string
+  ) => Promise<SavedConversation | null>;
   loadConversationFromUrl: () => void;
   deleteConversation: (conversationId: string) => void;
   clearAllConversations: () => void;
@@ -26,10 +32,10 @@ interface UseConversationsResult {
 
 // Helper function to generate a conversation title from the first user message
 function generateConversationTitle(messages: UIMessage[]): string {
-  const firstUserMessage = messages.find((msg) => msg.role === 'user');
+  const firstUserMessage = messages.find(msg => msg.role === 'user');
   if (!firstUserMessage?.parts?.length) return 'New Conversation';
 
-  const textPart = firstUserMessage.parts.find((part) => part.type === 'text');
+  const textPart = firstUserMessage.parts.find(part => part.type === 'text');
   if (!textPart || !('text' in textPart)) return 'New Conversation';
 
   const text = textPart.text.trim();
@@ -72,8 +78,11 @@ function setConversationIdInUrl(conversationId: string | null): void {
 
 export function useConversations(): UseConversationsResult {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<SavedConversation | null>(null);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversation, setCurrentConversation] =
+    useState<SavedConversation | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +101,7 @@ export function useConversations(): UseConversationsResult {
             modelId: conv.modelId,
             createdAt: new Date(conv.createdAt),
             updatedAt: new Date(conv.updatedAt),
-          }),
+          })
         );
 
         // Sort by most recently updated
@@ -112,7 +121,11 @@ export function useConversations(): UseConversationsResult {
   }, []);
 
   const saveConversation = useCallback(
-    async (messages: UIMessage[], modelId: string, title?: string): Promise<string> => {
+    async (
+      messages: UIMessage[],
+      modelId: string,
+      title?: string
+    ): Promise<string> => {
       setIsLoading(true);
       setError(null);
 
@@ -124,7 +137,7 @@ export function useConversations(): UseConversationsResult {
         const stored = localStorage.getItem(STORAGE_KEY);
         const existingConversations: SavedConversation[] = stored
           ? JSON.parse(stored).map((conv: SavedConversation) =>
-              deserializeConversation(JSON.stringify(conv)),
+              deserializeConversation(JSON.stringify(conv))
             )
           : [];
 
@@ -136,15 +149,15 @@ export function useConversations(): UseConversationsResult {
           // Use the current conversation ID if we have one
           conversationId = currentConversationId;
           existingConversation = existingConversations.find(
-            (conv) => conv.id === currentConversationId,
+            conv => conv.id === currentConversationId
           );
         } else {
           // Find existing conversation by checking if messages match (for updates)
           existingConversation = existingConversations.find(
-            (conv) =>
+            conv =>
               conv.messages.length > 0 &&
               messages.length > 0 &&
-              conv.messages[0]?.id === messages[0]?.id,
+              conv.messages[0]?.id === messages[0]?.id
           );
 
           if (existingConversation) {
@@ -164,7 +177,9 @@ export function useConversations(): UseConversationsResult {
         };
 
         // Update or add the conversation
-        const existingIndex = existingConversations.findIndex((conv) => conv.id === conversationId);
+        const existingIndex = existingConversations.findIndex(
+          conv => conv.id === conversationId
+        );
         if (existingIndex >= 0) {
           existingConversations[existingIndex] = conversation;
         } else {
@@ -172,10 +187,13 @@ export function useConversations(): UseConversationsResult {
         }
 
         // Limit the number of stored conversations
-        const trimmedConversations = existingConversations.slice(0, MAX_CONVERSATIONS);
+        const trimmedConversations = existingConversations.slice(
+          0,
+          MAX_CONVERSATIONS
+        );
 
         // Save back to localStorage
-        const serialized = trimmedConversations.map((conv) => {
+        const serialized = trimmedConversations.map(conv => {
           const { createdAt, updatedAt, ...rest } = conv;
           return {
             ...rest,
@@ -187,14 +205,16 @@ export function useConversations(): UseConversationsResult {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(serialized));
 
         // Update state
-        const summaries: ConversationSummary[] = trimmedConversations.map((conv) => ({
-          id: conv.id,
-          title: conv.title,
-          messageCount: conv.messages.length,
-          modelId: conv.modelId,
-          createdAt: conv.createdAt,
-          updatedAt: conv.updatedAt,
-        }));
+        const summaries: ConversationSummary[] = trimmedConversations.map(
+          conv => ({
+            id: conv.id,
+            title: conv.title,
+            messageCount: conv.messages.length,
+            modelId: conv.modelId,
+            createdAt: conv.createdAt,
+            updatedAt: conv.updatedAt,
+          })
+        );
 
         setConversations(summaries);
         setCurrentConversation(conversation);
@@ -205,7 +225,8 @@ export function useConversations(): UseConversationsResult {
 
         return conversationId;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to save conversation';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to save conversation';
         setError(errorMessage);
         console.error('Failed to save conversation:', err);
         throw new Error(errorMessage);
@@ -213,7 +234,7 @@ export function useConversations(): UseConversationsResult {
         setIsLoading(false);
       }
     },
-    [currentConversationId],
+    [currentConversationId]
   );
 
   const loadConversation = useCallback(
@@ -227,7 +248,7 @@ export function useConversations(): UseConversationsResult {
 
         const conversations = JSON.parse(stored);
         const conversationData = conversations.find(
-          (conv: SavedConversation) => conv.id === conversationId,
+          (conv: SavedConversation) => conv.id === conversationId
         );
 
         if (!conversationData) {
@@ -235,7 +256,9 @@ export function useConversations(): UseConversationsResult {
           return null;
         }
 
-        const conversation = deserializeConversation(JSON.stringify(conversationData));
+        const conversation = deserializeConversation(
+          JSON.stringify(conversationData)
+        );
         setCurrentConversation(conversation);
         setCurrentConversationId(conversationId);
 
@@ -244,7 +267,8 @@ export function useConversations(): UseConversationsResult {
 
         return conversation;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load conversation';
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load conversation';
         setError(errorMessage);
         console.error('Failed to load conversation:', err);
         return null;
@@ -252,7 +276,7 @@ export function useConversations(): UseConversationsResult {
         setIsLoadingConversation(false);
       }
     },
-    [],
+    []
   );
 
   const deleteConversation = useCallback(
@@ -263,13 +287,15 @@ export function useConversations(): UseConversationsResult {
 
         const conversations = JSON.parse(stored);
         const filtered = conversations.filter(
-          (conv: SavedConversation) => conv.id !== conversationId,
+          (conv: SavedConversation) => conv.id !== conversationId
         );
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 
         // Update state
-        setConversations((prev) => prev.filter((conv) => conv.id !== conversationId));
+        setConversations(prev =>
+          prev.filter(conv => conv.id !== conversationId)
+        );
 
         if (currentConversationId === conversationId) {
           setCurrentConversation(null);
@@ -281,7 +307,7 @@ export function useConversations(): UseConversationsResult {
         setError('Failed to delete conversation');
       }
     },
-    [currentConversationId],
+    [currentConversationId]
   );
 
   const clearAllConversations = useCallback(() => {
@@ -326,7 +352,7 @@ export function useConversations(): UseConversationsResult {
 
         const conversations = JSON.parse(stored);
         const conversation = conversations.find(
-          (conv: SavedConversation) => conv.id === conversationId,
+          (conv: SavedConversation) => conv.id === conversationId
         );
 
         if (conversation) {
@@ -335,16 +361,18 @@ export function useConversations(): UseConversationsResult {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
 
           // Update state
-          setConversations((prev) =>
-            prev.map((conv) =>
+          setConversations(prev =>
+            prev.map(conv =>
               conv.id === conversationId
                 ? { ...conv, title: newTitle, updatedAt: new Date() }
-                : conv,
-            ),
+                : conv
+            )
           );
 
           if (currentConversation?.id === conversationId) {
-            setCurrentConversation((prev) => (prev ? { ...prev, title: newTitle } : null));
+            setCurrentConversation(prev =>
+              prev ? { ...prev, title: newTitle } : null
+            );
           }
         }
       } catch (err) {
@@ -352,7 +380,7 @@ export function useConversations(): UseConversationsResult {
         setError('Failed to update conversation title');
       }
     },
-    [currentConversation],
+    [currentConversation]
   );
 
   const generateTitle = useCallback((messages: UIMessage[]): string => {

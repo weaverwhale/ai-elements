@@ -4,7 +4,7 @@ import { toolsMetadata } from '../tools';
 export async function handleToolsRequest() {
   try {
     // Map the tools to a format that's safe to send to the client
-    const toolInfo = Object.values(toolsMetadata).map((tool) => ({
+    const toolInfo = Object.values(toolsMetadata).map(tool => ({
       id: tool.id,
       name: tool.name,
       description: tool.description,

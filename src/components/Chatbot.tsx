@@ -24,9 +24,18 @@ import { Button } from '@/components/ui/button';
 import { SquarePen, RefreshCcwIcon, CopyIcon } from 'lucide-react';
 import { SearchableConversationDropdown } from '@/components/ai-elements/conversations';
 import { ModeToggleButton } from '@/components/ui/mode-toggle';
-import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/source';
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from '@/components/ai-elements/source';
 import { Actions, Action } from '@/components/ai-elements/actions';
-import { Reasoning, ReasoningContent, ReasoningTrigger } from '@/components/ai-elements/reasoning';
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from '@/components/ai-elements/reasoning';
 import { ThinkingIndicator } from '@/components/ai-elements/thinking-indicator';
 import {
   Tool,
@@ -46,7 +55,8 @@ export const Chatbot = () => {
   const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messages, sendMessage, status, setMessages, regenerate } = useChat();
-  const { availableModels, selectedModel, setSelectedModel, fetchModels } = useModels();
+  const { availableModels, selectedModel, setSelectedModel, fetchModels } =
+    useModels();
   const toolOptions = useToolOptions();
   const { suggestions, isLoading } = useSuggestions();
   const {
@@ -61,7 +71,9 @@ export const Chatbot = () => {
     deleteConversation,
   } = useConversations();
 
-  const availableConversations = conversations.filter((conv) => conv.id !== currentConversationId);
+  const availableConversations = conversations.filter(
+    conv => conv.id !== currentConversationId
+  );
 
   const getToolDisplayName = (toolType: string) => {
     const toolId = toolType.startsWith('tool-') ? toolType.slice(5) : toolType;
@@ -74,7 +86,7 @@ export const Chatbot = () => {
     return toolId
       .replace(/([A-Z])/g, ' $1')
       .replace(/[-_]/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase())
+      .replace(/\b\w/g, l => l.toUpperCase())
       .trim();
   };
 
@@ -92,7 +104,7 @@ export const Chatbot = () => {
           body: {
             modelId: selectedModel,
           },
-        },
+        }
       );
       setInput('');
     }
@@ -118,7 +130,7 @@ export const Chatbot = () => {
         console.error('Failed to load conversation:', err);
       }
     },
-    [loadConversation, setMessages, setSelectedModel],
+    [loadConversation, setMessages, setSelectedModel]
   );
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -133,11 +145,14 @@ export const Chatbot = () => {
         body: {
           modelId: selectedModel,
         },
-      },
+      }
     );
   };
 
-  const handleDeleteConversation = (e: React.MouseEvent, conversationId: string) => {
+  const handleDeleteConversation = (
+    e: React.MouseEvent,
+    conversationId: string
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     deleteConversation(conversationId);
@@ -166,13 +181,17 @@ export const Chatbot = () => {
 
   // Auto-save conversation when messages change
   useEffect(() => {
-    if (messages.length > 0 && status !== 'streaming' && !isLoadingConversation) {
+    if (
+      messages.length > 0 &&
+      status !== 'streaming' &&
+      !isLoadingConversation
+    ) {
       // Only save if we have at least one complete exchange (user + assistant)
-      const hasCompleteExchange = messages.some((m) => m.role === 'assistant');
+      const hasCompleteExchange = messages.some(m => m.role === 'assistant');
       if (hasCompleteExchange) {
         setIsSaving(true);
         saveConversation(messages, selectedModel)
-          .catch((err) => {
+          .catch(err => {
             console.error('Failed to auto-save conversation:', err);
           })
           .finally(() => {
@@ -180,7 +199,13 @@ export const Chatbot = () => {
           });
       }
     }
-  }, [messages, selectedModel, status, isLoadingConversation, saveConversation]);
+  }, [
+    messages,
+    selectedModel,
+    status,
+    isLoadingConversation,
+    saveConversation,
+  ]);
 
   return (
     <div className="max-w-4xl mx-auto relative size-full h-dvh">
@@ -190,7 +215,7 @@ export const Chatbot = () => {
             {messages.map((message, index) => (
               <div key={message.id}>
                 {message.role === 'assistant' &&
-                  message.parts.find((part) => part.type === 'source-url') && (
+                  message.parts.find(part => part.type === 'source-url') && (
                     <Sources>
                       {message.parts.map((part, i) => {
                         switch (part.type) {
@@ -199,8 +224,9 @@ export const Chatbot = () => {
                               <>
                                 <SourcesTrigger
                                   count={
-                                    message.parts.filter((part) => part.type === 'source-url')
-                                      .length
+                                    message.parts.filter(
+                                      part => part.type === 'source-url'
+                                    ).length
                                   }
                                 />
                                 <SourcesContent key={`${message.id}-${i}`}>
@@ -223,8 +249,11 @@ export const Chatbot = () => {
                         case 'text': {
                           return (
                             <div key={`${message.id}-${i}`}>
-                              <Response 
-                                isStreaming={status === 'streaming' && index === messages.length - 1}
+                              <Response
+                                isStreaming={
+                                  status === 'streaming' &&
+                                  index === messages.length - 1
+                                }
                               >
                                 {part.text}
                               </Response>
@@ -256,7 +285,9 @@ export const Chatbot = () => {
                                 <ToolHeader
                                   type={toolPart.type}
                                   state={toolPart.state}
-                                  displayName={getToolDisplayName(toolPart.type)}
+                                  displayName={getToolDisplayName(
+                                    toolPart.type
+                                  )}
                                 />
                                 <ToolContent>
                                   <ToolInput input={toolPart.input} />
@@ -264,11 +295,18 @@ export const Chatbot = () => {
                                     output={
                                       toolPart.output ? (
                                         <Response
-                                          isStreaming={status === 'streaming' && index === messages.length - 1}
+                                          isStreaming={
+                                            status === 'streaming' &&
+                                            index === messages.length - 1
+                                          }
                                         >
                                           {typeof toolPart.output === 'string'
                                             ? toolPart.output
-                                            : JSON.stringify(toolPart.output, null, 2)}
+                                            : JSON.stringify(
+                                                toolPart.output,
+                                                null,
+                                                2
+                                              )}
                                         </Response>
                                       ) : undefined
                                     }
@@ -287,7 +325,11 @@ export const Chatbot = () => {
                   index === messages.length - 1 &&
                   status !== 'streaming' && (
                     <Actions>
-                      <Action className="cursor-pointer" onClick={() => regenerate()} label="Retry">
+                      <Action
+                        className="cursor-pointer"
+                        onClick={() => regenerate()}
+                        label="Retry"
+                      >
                         <RefreshCcwIcon className="size-3" />
                       </Action>
                       <Action
@@ -295,9 +337,9 @@ export const Chatbot = () => {
                         onClick={() =>
                           navigator.clipboard.writeText(
                             message.parts
-                              .filter((part) => part.type === 'text')
-                              .map((part) => part.text)
-                              .join('\n'),
+                              .filter(part => part.type === 'text')
+                              .map(part => part.text)
+                              .join('\n')
                           )
                         }
                         label="Copy"
@@ -342,7 +384,7 @@ export const Chatbot = () => {
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea
             ref={textareaRef}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             value={input}
           />
           <PromptInputToolbar className="flex gap-2 p-2">
@@ -370,7 +412,7 @@ export const Chatbot = () => {
 
               <PromptInputTools>
                 <PromptInputModelSelect
-                  onValueChange={(value) => {
+                  onValueChange={value => {
                     setSelectedModel(value);
                   }}
                   value={selectedModel}
@@ -379,8 +421,11 @@ export const Chatbot = () => {
                     <PromptInputModelSelectValue />
                   </PromptInputModelSelectTrigger>
                   <PromptInputModelSelectContent>
-                    {availableModels.map((model) => (
-                      <PromptInputModelSelectItem key={model.id} value={model.id}>
+                    {availableModels.map(model => (
+                      <PromptInputModelSelectItem
+                        key={model.id}
+                        value={model.id}
+                      >
                         {model.name}
                       </PromptInputModelSelectItem>
                     ))}

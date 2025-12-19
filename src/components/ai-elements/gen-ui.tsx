@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
 import { useLocation } from 'react-router';
 import { LiveProvider, LiveError, LivePreview } from 'react-live';
 import { Button } from '@/components/ui/button';
@@ -16,7 +22,10 @@ class ComponentErrorBoundary extends React.Component<
   { children: React.ReactNode; onError?: (error: Error) => void },
   { hasError: boolean; error?: Error }
 > {
-  constructor(props: { children: React.ReactNode; onError?: (error: Error) => void }) {
+  constructor(props: {
+    children: React.ReactNode;
+    onError?: (error: Error) => void;
+  }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -36,7 +45,9 @@ class ComponentErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <div className="bg-destructive/10 border border-destructive/20 p-4">
-          <h3 className="text-destructive font-semibold mb-2">Component Error</h3>
+          <h3 className="text-destructive font-semibold mb-2">
+            Component Error
+          </h3>
           <p className="text-destructive/80 text-sm mb-2">
             The generated component encountered a runtime error:
           </p>
@@ -119,12 +130,13 @@ const createSafeScope = () => ({
   Intl,
 
   // Common array methods that are safe
-  map: (arr: unknown[], fn: (item: unknown, index: number) => unknown) => arr.map(fn),
+  map: (arr: unknown[], fn: (item: unknown, index: number) => unknown) =>
+    arr.map(fn),
   filter: (arr: unknown[], fn: (item: unknown) => boolean) => arr.filter(fn),
   reduce: (
     arr: unknown[],
     fn: (acc: unknown, item: unknown, index: number) => unknown,
-    initial: unknown,
+    initial: unknown
   ) => arr.reduce(fn, initial),
 
   // Safe setTimeout/setInterval (with limits)
@@ -147,7 +159,11 @@ const createSafeScope = () => ({
   Promise,
 });
 
-const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError, isLoading }) => {
+const GenerativeUI: React.FC<GenerativeUIProps> = ({
+  jsxString,
+  onError,
+  isLoading,
+}) => {
   const location = useLocation();
   const pathname = location.pathname;
   const [isReady, setIsReady] = useState(false);
@@ -204,7 +220,9 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError, isLoadi
 
     // Remove markdown code block wrapper if present - more robust approach
     // Handle various markdown block formats
-    code = code.replace(/^```(?:jsx|javascript|js)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+    code = code
+      .replace(/^```(?:jsx|javascript|js)?\s*\n?/i, '')
+      .replace(/\n?```\s*$/i, '');
 
     // Remove any remaining backticks and dollar signs that might be artifacts
     code = code.replace(/```[\s\S]*$/g, '').replace(/\$\s*$/g, '');
@@ -283,10 +301,14 @@ const GenerativeUI: React.FC<GenerativeUIProps> = ({ jsxString, onError, isLoadi
     return (
       <div className="mb-4 border overflow-hidden rounded-md">
         <div className="bg-muted/50 border-b px-4 py-2">
-          <span className="text-sm font-medium text-muted-foreground">Generated UI Component</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            Generated UI Component
+          </span>
         </div>
         <div className="p-8 flex items-center justify-center">
-          <span className="text-sm text-muted-foreground">Loading component...</span>
+          <span className="text-sm text-muted-foreground">
+            Loading component...
+          </span>
         </div>
       </div>
     );

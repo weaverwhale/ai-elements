@@ -31,7 +31,9 @@ export const GenUIViewer = () => {
         if (storedJsx) {
           setJsxString(storedJsx);
         } else {
-          setJsxString('No component data found. Please generate a UI component first.');
+          setJsxString(
+            'No component data found. Please generate a UI component first.'
+          );
         }
 
         setConversationId(conversationIdFromUrl);
@@ -90,7 +92,9 @@ export const GenUIViewer = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to={conversationId ? `/?conversation=${conversationId}` : '/'}>
+              <Link
+                to={conversationId ? `/?conversation=${conversationId}` : '/'}
+              >
                 <Button variant="ghost" size="sm" className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   Back to Chat
@@ -98,7 +102,12 @@ export const GenUIViewer = () => {
               </Link>
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={handleCopyToClipboard} variant="outline" size="sm" className="gap-2">
+              <Button
+                onClick={handleCopyToClipboard}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
                 <Copy className="h-4 w-4" />
                 {copySuccess ? 'Copied!' : 'Copy JSX'}
               </Button>
@@ -111,7 +120,12 @@ export const GenUIViewer = () => {
                 <Download className="h-4 w-4" />
                 Download
               </Button>
-              <Button onClick={handleShareComponent} variant="outline" size="sm" className="gap-2">
+              <Button
+                onClick={handleShareComponent}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
@@ -125,7 +139,7 @@ export const GenUIViewer = () => {
           <GenerativeUI
             jsxString={jsxString}
             isLoading={false}
-            onError={(error) => {
+            onError={error => {
               console.error('GenUI viewer error:', error);
             }}
           />

@@ -106,7 +106,7 @@ async function makeGitHubGraphQLRequest<T>(
   query: string,
   variables: GitHubGraphQLVariables = {},
   retryCount = 0,
-  maxRetries = 3,
+  maxRetries = 3
 ): Promise<GitHubGraphQLResponse<T>> {
   const url = 'https://api.github.com/graphql';
   try {
@@ -127,42 +127,58 @@ async function makeGitHubGraphQLRequest<T>(
       limit: response.headers.get('X-RateLimit-Limit') || 'unknown',
       remaining: response.headers.get('X-RateLimit-Remaining') || 'unknown',
       reset: response.headers.get('X-RateLimit-Reset')
-        ? new Date(Number(response.headers.get('X-RateLimit-Reset')) * 1000).toLocaleString()
+        ? new Date(
+            Number(response.headers.get('X-RateLimit-Reset')) * 1000
+          ).toLocaleString()
         : 'unknown',
       resetSeconds: response.headers.get('X-RateLimit-Reset')
-        ? Number(response.headers.get('X-RateLimit-Reset')) - Math.floor(Date.now() / 1000)
+        ? Number(response.headers.get('X-RateLimit-Reset')) -
+          Math.floor(Date.now() / 1000)
         : 0,
     };
     console.log(
-      `GitHub API rate limit: ${rateLimit.remaining}/${rateLimit.limit}, resets at ${rateLimit.reset} (in ${rateLimit.resetSeconds} seconds)`,
+      `GitHub API rate limit: ${rateLimit.remaining}/${rateLimit.limit}, resets at ${rateLimit.reset} (in ${rateLimit.resetSeconds} seconds)`
     );
 
     // Handle rate limiting or potential 403 with 0 remaining
     if (
-      (response.status === 403 && response.headers.get('X-RateLimit-Remaining') === '0') ||
+      (response.status === 403 &&
+        response.headers.get('X-RateLimit-Remaining') === '0') ||
       response.status === 429
     ) {
       if (retryCount < maxRetries) {
         let waitTime = 0;
         if (response.headers.get('X-RateLimit-Reset')) {
-          waitTime = Number(response.headers.get('X-RateLimit-Reset')) * 1000 - Date.now() + 1000;
+          waitTime =
+            Number(response.headers.get('X-RateLimit-Reset')) * 1000 -
+            Date.now() +
+            1000;
           waitTime = Math.min(waitTime, 10 * 60 * 1000); // cap at 10 minutes
         } else {
           // exponential backoff with jitter
-          waitTime = Math.min(1000 * Math.pow(2, retryCount) + Math.random() * 1000, 60000);
+          waitTime = Math.min(
+            1000 * Math.pow(2, retryCount) + Math.random() * 1000,
+            60000
+          );
         }
 
         console.log(
           `Rate limit hit. Retrying in ${Math.floor(waitTime / 1000)} seconds (retry ${
             retryCount + 1
-          }/${maxRetries})...`,
+          }/${maxRetries})...`
         );
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
-        return makeGitHubGraphQLRequest<T>(token, query, variables, retryCount + 1, maxRetries);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return makeGitHubGraphQLRequest<T>(
+          token,
+          query,
+          variables,
+          retryCount + 1,
+          maxRetries
+        );
       }
 
       throw new Error(
-        `GitHub API rate limit exceeded. Resets at ${rateLimit.reset}. Please try again later.`,
+        `GitHub API rate limit exceeded. Resets at ${rateLimit.reset}. Please try again later.`
       );
     }
 
@@ -185,7 +201,9 @@ async function makeGitHubGraphQLRequest<T>(
 
     const data = (await response.json()) as GitHubGraphQLResponse<T>;
     if (data.errors) {
-      throw new Error(`GitHub GraphQL response errors: ${JSON.stringify(data.errors)}`);
+      throw new Error(
+        `GitHub GraphQL response errors: ${JSON.stringify(data.errors)}`
+      );
     }
 
     return data;
@@ -200,7 +218,7 @@ async function makeGitHubRESTRequest(
   url: string,
   token: string,
   retryCount = 0,
-  maxRetries = 3,
+  maxRetries = 3
 ): Promise<GitHubRESTCommitResponse> {
   try {
     console.log(`Making GitHub REST request to: ${url}`);
@@ -217,42 +235,52 @@ async function makeGitHubRESTRequest(
       limit: response.headers.get('X-RateLimit-Limit'),
       remaining: response.headers.get('X-RateLimit-Remaining'),
       reset: response.headers.get('X-RateLimit-Reset')
-        ? new Date(Number(response.headers.get('X-RateLimit-Reset')) * 1000).toLocaleString()
+        ? new Date(
+            Number(response.headers.get('X-RateLimit-Reset')) * 1000
+          ).toLocaleString()
         : 'unknown',
       resetSeconds: response.headers.get('X-RateLimit-Reset')
-        ? Number(response.headers.get('X-RateLimit-Reset')) - Math.floor(Date.now() / 1000)
+        ? Number(response.headers.get('X-RateLimit-Reset')) -
+          Math.floor(Date.now() / 1000)
         : 0,
     };
     console.log(
-      `GitHub API rate limit: ${rateLimit.remaining}/${rateLimit.limit}, resets at ${rateLimit.reset} (in ${rateLimit.resetSeconds} seconds)`,
+      `GitHub API rate limit: ${rateLimit.remaining}/${rateLimit.limit}, resets at ${rateLimit.reset} (in ${rateLimit.resetSeconds} seconds)`
     );
 
     if (
-      (response.status === 403 && response.headers.get('X-RateLimit-Remaining') === '0') ||
+      (response.status === 403 &&
+        response.headers.get('X-RateLimit-Remaining') === '0') ||
       response.status === 429
     ) {
       if (retryCount < maxRetries) {
         let waitTime = 0;
         if (response.headers.get('X-RateLimit-Reset')) {
-          waitTime = Number(response.headers.get('X-RateLimit-Reset')) * 1000 - Date.now() + 1000;
+          waitTime =
+            Number(response.headers.get('X-RateLimit-Reset')) * 1000 -
+            Date.now() +
+            1000;
           // cap at 10 minutes
           waitTime = Math.min(waitTime, 10 * 60 * 1000);
         } else {
           // exponential backoff with jitter
-          waitTime = Math.min(1000 * Math.pow(2, retryCount) + Math.random() * 1000, 60000);
+          waitTime = Math.min(
+            1000 * Math.pow(2, retryCount) + Math.random() * 1000,
+            60000
+          );
         }
 
         console.log(
           `Rate limit hit. Retrying in ${Math.floor(waitTime / 1000)} seconds (retry ${
             retryCount + 1
-          }/${maxRetries})...`,
+          }/${maxRetries})...`
         );
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
+        await new Promise(resolve => setTimeout(resolve, waitTime));
         return makeGitHubRESTRequest(url, token, retryCount + 1, maxRetries);
       }
       const resetTime = rateLimit.reset;
       throw new Error(
-        `GitHub API rate limit exceeded. Resets at ${resetTime}. Please try again later.`,
+        `GitHub API rate limit exceeded. Resets at ${resetTime}. Please try again later.`
       );
     }
 
@@ -287,10 +315,10 @@ async function fetchUserPRs(
   username: string,
   startDate: string,
   endDate: string,
-  token: string,
+  token: string
 ): Promise<GitHubPR[]> {
   console.log(
-    `Fetching PRs (GraphQL) for ${username} from ${startDate} to ${endDate} across ${repos.length} repositories`,
+    `Fetching PRs (GraphQL) for ${username} from ${startDate} to ${endDate} across ${repos.length} repositories`
   );
 
   // Batch size and delay for rate limiting management
@@ -328,11 +356,18 @@ async function fetchUserPRs(
     `;
 
     while (hasNextPage) {
-      const variables: GitHubGraphQLVariables = { searchQuery, after: afterCursor };
+      const variables: GitHubGraphQLVariables = {
+        searchQuery,
+        after: afterCursor,
+      };
       const data: GitHubGraphQLResponse<GitHubGraphQLSearchResponse> =
-        await makeGitHubGraphQLRequest<GitHubGraphQLSearchResponse>(token, gqlQuery, variables);
+        await makeGitHubGraphQLRequest<GitHubGraphQLSearchResponse>(
+          token,
+          gqlQuery,
+          variables
+        );
       const currentNodes = (data.data.search.nodes || []).filter(
-        (node: unknown): node is GitHubGraphQLNode => node !== null,
+        (node: unknown): node is GitHubGraphQLNode => node !== null
       );
       const pageInfo: GitHubGraphQLPageInfo = data.data.search.pageInfo;
 
@@ -358,25 +393,25 @@ async function fetchUserPRs(
   for (let i = 0; i < repos.length; i += batchSize) {
     const batch = repos.slice(i, i + batchSize);
     console.log(
-      `Fetching PR batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(repos.length / batchSize)}`,
+      `Fetching PR batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(repos.length / batchSize)}`
     );
 
     const batchData = await Promise.all(
-      batch.map(async (r) => {
+      batch.map(async r => {
         try {
           return await fetchRepoPRs(r);
         } catch (error) {
           console.error(`Error fetching PRs for ${r}`, error);
           return [];
         }
-      }),
+      })
     );
 
     results = results.concat(...batchData);
 
     if (i + batchSize < repos.length) {
       console.log(`Waiting ${delayBetweenBatches}ms before next PR batch...`);
-      await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+      await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
     }
   }
 
@@ -389,10 +424,10 @@ async function fetchUserCommits(
   username: string,
   startDate: string,
   endDate: string,
-  token: string,
+  token: string
 ): Promise<GitHubCommit[]> {
   console.log(
-    `Fetching commits (REST) for ${username} from ${startDate} to ${endDate} across ${repos.length} repositories`,
+    `Fetching commits (REST) for ${username} from ${startDate} to ${endDate} across ${repos.length} repositories`
   );
 
   const batchSize = 10;
@@ -409,11 +444,11 @@ async function fetchUserCommits(
 
       while (hasMorePages) {
         const url = `https://api.github.com/search/commits?q=${encodeURIComponent(
-          searchQuery,
+          searchQuery
         )}&page=${page}&per_page=100`;
         const data = await makeGitHubRESTRequest(url, token);
         if (data.items && Array.isArray(data.items)) {
-          const commits = data.items.map((item) => {
+          const commits = data.items.map(item => {
             return {
               commit: {
                 author: {
@@ -442,8 +477,8 @@ async function fetchUserCommits(
     const batch = repos.slice(i, i + batchSize);
     console.log(
       `Fetching commits batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(
-        repos.length / batchSize,
-      )}`,
+        repos.length / batchSize
+      )}`
     );
 
     const batchCommits = await Promise.all(batch.map(fetchRepoCommits));
@@ -451,8 +486,10 @@ async function fetchUserCommits(
 
     // Delay between batches
     if (i + batchSize < repos.length) {
-      console.log(`Waiting ${delayBetweenBatches}ms before next commit batch...`);
-      await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+      console.log(
+        `Waiting ${delayBetweenBatches}ms before next commit batch...`
+      );
+      await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
     }
   }
 
@@ -466,7 +503,15 @@ function formatDate(date: Date): string {
 
 // Helper function to format display dates
 function formatDisplayDate(date: Date): string {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
   const dayName = days[date.getDay()];
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -478,7 +523,7 @@ function formatDisplayDate(date: Date): string {
 async function getDateRange(
   offsetWeeks: number = 0,
   startDateStr?: string,
-  endDateStr?: string,
+  endDateStr?: string
 ): Promise<{ startDate: string; endDate: string }> {
   // If explicit dates are provided, use them
   if (startDateStr && endDateStr) {
@@ -521,10 +566,10 @@ async function fetchUserRepositories(
   username: string,
   organization: string,
   token: string,
-  lookbackMonths: number = 6,
+  lookbackMonths: number = 6
 ): Promise<string[]> {
   console.log(
-    `Fetching repositories for user ${username} in organization ${organization} and personal repositories`,
+    `Fetching repositories for user ${username} in organization ${organization} and personal repositories`
   );
 
   try {
@@ -561,10 +606,14 @@ async function fetchUserRepositories(
 
     while (personalHasNext) {
       const data: GitHubGraphQLResponse<GitHubGraphQLUserResponse> =
-        await makeGitHubGraphQLRequest<GitHubGraphQLUserResponse>(token, personalReposQuery, {
-          login: username,
-          after: personalAfter,
-        });
+        await makeGitHubGraphQLRequest<GitHubGraphQLUserResponse>(
+          token,
+          personalReposQuery,
+          {
+            login: username,
+            after: personalAfter,
+          }
+        );
       const repoNodes = data.data.user.repositories.nodes || [];
       repoNodes.forEach((node: { name: string; nameWithOwner: string }) => {
         if (node.nameWithOwner) {
@@ -579,19 +628,19 @@ async function fetchUserRepositories(
 
     // REST for searching commits in the org
     console.log(
-      `Searching for commits by ${username} in org ${organization} from ${startDate}..${endDate}`,
+      `Searching for commits by ${username} in org ${organization} from ${startDate}..${endDate}`
     );
     let page = 1;
     let hasMorePages = true;
     while (hasMorePages) {
       const searchQuery = `org:${organization} author:${username} committer-date:${startDate}..${endDate}`;
       const url = `https://api.github.com/search/commits?q=${encodeURIComponent(
-        searchQuery,
+        searchQuery
       )}&per_page=100&page=${page}`;
       // Use the same accept for commits
       const data = await makeGitHubRESTRequest(url, token);
       if (Array.isArray(data.items) && data.items.length > 0) {
-        data.items.forEach((item) => {
+        data.items.forEach(item => {
           if (item.repository && item.repository.full_name) {
             repoSet.add(item.repository.full_name);
           }
@@ -620,7 +669,7 @@ async function generateWeeklyReport(
   token: string,
   username: string,
   openAiApiKey?: string,
-  openAiModel: string = 'gpt-4o',
+  openAiModel: string = 'gpt-4o'
 ): Promise<string> {
   try {
     // PRs via GraphQL, commits via REST
@@ -647,7 +696,7 @@ async function generateWeeklyReport(
       reportContent += `## ${displayDate}\n\n`;
 
       // Filter PRs for this day
-      const dayPRs = prs.filter((pr) => pr.createdAt.startsWith(dateStr));
+      const dayPRs = prs.filter(pr => pr.createdAt.startsWith(dateStr));
       if (dayPRs.length > 0) {
         reportContent += `  ### PRs\n\n`;
         for (const pr of dayPRs) {
@@ -657,7 +706,9 @@ async function generateWeeklyReport(
       }
 
       // Filter commits for this day
-      const dayCommits = commits.filter((commit) => commit.commit.author.date.startsWith(dateStr));
+      const dayCommits = commits.filter(commit =>
+        commit.commit.author.date.startsWith(dateStr)
+      );
       if (dayCommits.length > 0) {
         reportContent += `  ### Commits\n\n`;
         for (const c of dayCommits) {
@@ -673,28 +724,33 @@ async function generateWeeklyReport(
     // Optionally call OpenAI to generate a summary
     if (openAiApiKey) {
       try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${openAiApiKey}`,
-          },
-          body: JSON.stringify({
-            model: openAiModel,
-            temperature: 0.2,
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are a professional assistant generating summaries of GitHub activity. Your summary should be concise, focused on major themes, and clearly organize work into categories. Highlight key accomplishments and focus areas.',
-              },
-              { role: 'user', content: reportContent },
-            ],
-          }),
-        });
+        const response = await fetch(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${openAiApiKey}`,
+            },
+            body: JSON.stringify({
+              model: openAiModel,
+              temperature: 0.2,
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are a professional assistant generating summaries of GitHub activity. Your summary should be concise, focused on major themes, and clearly organize work into categories. Highlight key accomplishments and focus areas.',
+                },
+                { role: 'user', content: reportContent },
+              ],
+            }),
+          }
+        );
 
         if (response.ok) {
-          const data = (await response.json()) as { choices: { message: { content: string } }[] };
+          const data = (await response.json()) as {
+            choices: { message: { content: string } }[];
+          };
           const summary = data.choices[0].message.content;
           reportContent += `\n### Quick Summary:\n${summary}\n`;
         }
@@ -725,7 +781,10 @@ const weeklyReport = {
       .optional()
       .default(0)
       .describe('Offset the week range by this many weeks (default: 0)'),
-    repos: z.array(z.string()).optional().describe('List of repositories to include in the report'),
+    repos: z
+      .array(z.string())
+      .optional()
+      .describe('List of repositories to include in the report'),
     generateSummary: z
       .boolean()
       .optional()
@@ -736,8 +795,14 @@ const weeklyReport = {
       .optional()
       .default('Triple-Whale')
       .describe('GitHub organization name'),
-    startDate: z.string().optional().describe('Start date in YYYY-MM-DD format (overrides offset)'),
-    endDate: z.string().optional().describe('End date in YYYY-MM-DD format (overrides offset)'),
+    startDate: z
+      .string()
+      .optional()
+      .describe('Start date in YYYY-MM-DD format (overrides offset)'),
+    endDate: z
+      .string()
+      .optional()
+      .describe('End date in YYYY-MM-DD format (overrides offset)'),
   }),
   execute: async ({
     username,
@@ -753,14 +818,17 @@ const weeklyReport = {
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
     if (!GITHUB_TOKEN) {
       throw new Error(
-        'GitHub token is required. Please set GITHUB_TOKEN in your environment variables.',
+        'GitHub token is required. Please set GITHUB_TOKEN in your environment variables.'
       );
     }
 
     // Validate with a small GraphQL call
     try {
       const testQuery = `query { viewer { login } }`;
-      await makeGitHubGraphQLRequest<GitHubGraphQLViewerResponse>(GITHUB_TOKEN, testQuery);
+      await makeGitHubGraphQLRequest<GitHubGraphQLViewerResponse>(
+        GITHUB_TOKEN,
+        testQuery
+      );
     } catch (error) {
       console.error('Error validating GitHub token with GraphQL:', error);
       if (error instanceof Error) {
@@ -785,10 +853,18 @@ const weeklyReport = {
     if (!repos) {
       // Attempt to fetch repos
       try {
-        console.log(`Attempting to fetch repositories for ${username} in ${organization}`);
-        const userRepos = await fetchUserRepositories(username, organization, GITHUB_TOKEN);
+        console.log(
+          `Attempting to fetch repositories for ${username} in ${organization}`
+        );
+        const userRepos = await fetchUserRepositories(
+          username,
+          organization,
+          GITHUB_TOKEN
+        );
         if (userRepos.length > 0) {
-          console.log(`Found ${userRepos.length} repos for user, plus fallback merged in`);
+          console.log(
+            `Found ${userRepos.length} repos for user, plus fallback merged in`
+          );
           finalRepos = [...new Set([...userRepos, ...fallbackRepos])];
         } else {
           console.log('No user repos found, using fallback list only.');
@@ -800,19 +876,22 @@ const weeklyReport = {
       }
     } else {
       console.log(`Using provided repos: ${JSON.stringify(repos)}`);
-      finalRepos = repos.map((r) => (r.includes('/') ? r : `${organization}/${r}`));
+      finalRepos = repos.map(r =>
+        r.includes('/') ? r : `${organization}/${r}`
+      );
     }
 
     try {
-      const { startDate: calculatedStartDate, endDate: calculatedEndDate } = await getDateRange(
-        offset,
-        startDate,
-        endDate,
-      );
+      const { startDate: calculatedStartDate, endDate: calculatedEndDate } =
+        await getDateRange(offset, startDate, endDate);
 
-      const openAiApiKey = generateSummary ? process.env.OPENAI_API_KEY : undefined;
+      const openAiApiKey = generateSummary
+        ? process.env.OPENAI_API_KEY
+        : undefined;
       if (generateSummary && !openAiApiKey) {
-        console.warn('OpenAI API key not found. Summary will not be generated.');
+        console.warn(
+          'OpenAI API key not found. Summary will not be generated.'
+        );
       }
 
       const report = await generateWeeklyReport(
@@ -821,7 +900,7 @@ const weeklyReport = {
         calculatedEndDate,
         GITHUB_TOKEN,
         username,
-        openAiApiKey,
+        openAiApiKey
       );
 
       return report;

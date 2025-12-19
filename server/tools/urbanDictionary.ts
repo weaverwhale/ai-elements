@@ -9,7 +9,8 @@ type UrbanDictionaryParams = {
 const urbanDictionary = {
   id: 'urbanDictionary',
   name: 'Urban Dictionary',
-  description: 'Useful for looking up slang definitions and internet culture terms',
+  description:
+    'Useful for looking up slang definitions and internet culture terms',
   inputSchema: z.object({
     term: z.string().describe('The term to look up'),
   }),
@@ -21,7 +22,9 @@ const urbanDictionary = {
     try {
       const htmlResponse = await fetch(proxyUrl);
       if (!htmlResponse.ok) {
-        throw new Error(`API request failed with status ${htmlResponse.status}`);
+        throw new Error(
+          `API request failed with status ${htmlResponse.status}`
+        );
       }
 
       const html = await htmlResponse.text();

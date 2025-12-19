@@ -48,6 +48,8 @@ console.log('\n🎯 Next steps:');
 console.log('1. Fund your wallet with devnet SOL:');
 console.log(`   Visit: https://faucet.solana.com/`);
 console.log(`   Address: ${publicKey}`);
-console.log('\n2. Test your setup by running your server and trying the Solana tool');
+console.log(
+  '\n2. Test your setup by running your server and trying the Solana tool'
+);
 console.log('\n⚠️  IMPORTANT: This is a TEST wallet for devnet only!');
 console.log('   Never use this private key on mainnet with real funds.');

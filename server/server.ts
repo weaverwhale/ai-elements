@@ -25,7 +25,10 @@ const allowedOrigins = [
 ];
 
 // In production, add Railway domain if available
-if (process.env.NODE_ENV === 'production' && process.env.RAILWAY_PUBLIC_DOMAIN) {
+if (
+  process.env.NODE_ENV === 'production' &&
+  process.env.RAILWAY_PUBLIC_DOMAIN
+) {
   allowedOrigins.push(`https://${process.env.RAILWAY_PUBLIC_DOMAIN}`);
 }
 
@@ -33,7 +36,7 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json());
@@ -56,10 +59,13 @@ app.get('/api/health', (_req, res) => {
 app.get('/api/models', (_req, res) => {
   try {
     const availableModels = getAvailableModelProviders();
-    console.log('[SERVER] Available models:', availableModels.map((m) => m.name).join(', '));
+    console.log(
+      '[SERVER] Available models:',
+      availableModels.map(m => m.name).join(', ')
+    );
 
     res.json({
-      models: availableModels.map((p) => ({ id: p.id, name: p.name })),
+      models: availableModels.map(p => ({ id: p.id, name: p.name })),
       count: availableModels.length,
     });
   } catch (error) {
@@ -133,7 +139,7 @@ function webToNodeStream(webStream: ReadableStream): Readable {
         nodeStream.push(Buffer.from(value));
         processStream();
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('[SERVER] Stream error:', err);
         nodeStream.destroy(err);
       });
@@ -141,7 +147,7 @@ function webToNodeStream(webStream: ReadableStream): Readable {
 
   processStream();
 
-  nodeStream.on('error', (err) => {
+  nodeStream.on('error', err => {
     console.error('[SERVER] Stream error:', err);
   });
 
@@ -184,7 +190,10 @@ app.post('/api/chat', async (req, res) => {
       res.json(response);
     }
   } catch (error) {
-    console.error('[SERVER] API error:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[SERVER] API error:',
+      error instanceof Error ? error.message : String(error)
+    );
     res.status(500).json({
       error: 'Failed to process request',
       details: error instanceof Error ? error.message : String(error),

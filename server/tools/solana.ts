@@ -44,7 +44,8 @@ function getConnection(network: string = 'devnet'): Connection {
 
   switch (network) {
     case 'mainnet-beta':
-      endpoint = process.env.SOLANA_MAINNET_RPC || clusterApiUrl('mainnet-beta');
+      endpoint =
+        process.env.SOLANA_MAINNET_RPC || clusterApiUrl('mainnet-beta');
       break;
     case 'testnet':
       endpoint = process.env.SOLANA_TESTNET_RPC || clusterApiUrl('testnet');
@@ -59,7 +60,11 @@ function getConnection(network: string = 'devnet'): Connection {
 }
 
 // Generate a new Solana wallet
-function generateWallet(): { publicKey: string; privateKey: string; mnemonic?: string } {
+function generateWallet(): {
+  publicKey: string;
+  privateKey: string;
+  mnemonic?: string;
+} {
   const keypair = Keypair.generate();
 
   return {
@@ -75,7 +80,10 @@ function getWalletFromPrivateKey(privateKeyBase64: string): Keypair {
 }
 
 // Get wallet balance (simple version for backward compatibility)
-async function getBalance(publicKey: string, network: string = 'devnet'): Promise<number> {
+async function getBalance(
+  publicKey: string,
+  network: string = 'devnet'
+): Promise<number> {
   try {
     const connection = getConnection(network);
     const pubKey = new PublicKey(publicKey);
@@ -83,7 +91,7 @@ async function getBalance(publicKey: string, network: string = 'devnet'): Promis
     return balance / LAMPORTS_PER_SOL; // Convert lamports to SOL
   } catch (error) {
     throw new Error(
-      `Failed to get balance: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to get balance: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -91,7 +99,7 @@ async function getBalance(publicKey: string, network: string = 'devnet'): Promis
 // Get enhanced balance information
 async function getEnhancedBalance(
   publicKey: string,
-  network: string = 'devnet',
+  network: string = 'devnet'
 ): Promise<{
   balance: number;
   balanceInLamports: number;
@@ -123,7 +131,9 @@ async function getEnhancedBalance(
     // Calculate rent-exempt reserve
     const rentExemptReserve =
       accountExists && accountInfo
-        ? await connection.getMinimumBalanceForRentExemption(accountInfo.data.length)
+        ? await connection.getMinimumBalanceForRentExemption(
+            accountInfo.data.length
+          )
         : await connection.getMinimumBalanceForRentExemption(0);
 
     return {
@@ -131,12 +141,13 @@ async function getEnhancedBalance(
       balanceInLamports,
       rentExemptReserve: rentExemptReserve / LAMPORTS_PER_SOL,
       executable: accountInfo?.executable || false,
-      owner: accountInfo?.owner.toString() || '11111111111111111111111111111111', // System Program
+      owner:
+        accountInfo?.owner.toString() || '11111111111111111111111111111111', // System Program
       accountExists,
     };
   } catch (error) {
     throw new Error(
-      `Failed to get enhanced balance: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to get enhanced balance: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -147,7 +158,7 @@ async function sendSol(
   recipientAddress: string,
   amount: number,
   network: string = 'devnet',
-  memo?: string,
+  memo?: string
 ): Promise<{ signature: string; fee: number }> {
   try {
     const connection = getConnection(network);
@@ -186,9 +197,14 @@ async function sendSol(
     const estimatedFee = fee?.value || 5000; // Default fallback
 
     // Send and confirm transaction
-    const signature = await sendAndConfirmTransaction(connection, transaction, [senderKeypair], {
-      commitment: 'confirmed',
-    });
+    const signature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [senderKeypair],
+      {
+        commitment: 'confirmed',
+      }
+    );
 
     return {
       signature,
@@ -196,7 +212,7 @@ async function sendSol(
     };
   } catch (error) {
     throw new Error(
-      `Failed to send SOL: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to send SOL: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -215,7 +231,7 @@ function isValidSolanaAddress(address: string): boolean {
 async function getTokenBalance(
   walletAddress: string,
   tokenMint: string,
-  network: string = 'devnet',
+  network: string = 'devnet'
 ): Promise<{ balance: number; decimals: number; uiAmount: number }> {
   try {
     const connection = getConnection(network);
@@ -227,12 +243,14 @@ async function getTokenBalance(
       TOKEN_PROGRAM_ID,
       TOKEN_PROGRAM_ID,
       mintPubKey,
-      walletPubKey,
+      walletPubKey
     );
 
     try {
       // Get the token account info
-      const tokenAccount = await connection.getTokenAccountBalance(associatedTokenAddress);
+      const tokenAccount = await connection.getTokenAccountBalance(
+        associatedTokenAddress
+      );
 
       const balance = Number(tokenAccount.value.amount);
       const uiAmountFromAPI = tokenAccount.value.uiAmount || 0;
@@ -248,7 +266,7 @@ async function getTokenBalance(
     }
   } catch (error) {
     throw new Error(
-      `Failed to get token balance: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to get token balance: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -256,7 +274,7 @@ async function getTokenBalance(
 // Get token information
 async function getTokenInfo(
   tokenMint: string,
-  network: string = 'devnet',
+  network: string = 'devnet'
 ): Promise<{
   mintAuthority: string | null;
   supply: string;
@@ -300,7 +318,7 @@ async function getTokenInfo(
     };
   } catch (error) {
     throw new Error(
-      `Failed to get token info: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to get token info: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -312,7 +330,7 @@ async function sendTokens(
   tokenMint: string,
   amount: number,
   decimals: number,
-  network: string = 'devnet',
+  network: string = 'devnet'
 ): Promise<{ signature: string; fee: number }> {
   try {
     const connection = getConnection(network);
@@ -325,14 +343,14 @@ async function sendTokens(
       TOKEN_PROGRAM_ID,
       TOKEN_PROGRAM_ID,
       mintPubKey,
-      senderKeypair.publicKey,
+      senderKeypair.publicKey
     );
 
     const recipientTokenAddress = await Token.getAssociatedTokenAddress(
       TOKEN_PROGRAM_ID,
       TOKEN_PROGRAM_ID,
       mintPubKey,
-      recipientPubKey,
+      recipientPubKey
     );
 
     const transaction = new Transaction();
@@ -349,8 +367,8 @@ async function sendTokens(
           mintPubKey,
           recipientTokenAddress,
           recipientPubKey,
-          senderKeypair.publicKey,
-        ),
+          senderKeypair.publicKey
+        )
       );
     }
 
@@ -363,8 +381,8 @@ async function sendTokens(
         recipientTokenAddress,
         senderKeypair.publicKey,
         [],
-        transferAmount,
-      ),
+        transferAmount
+      )
     );
 
     // Get recent blockhash
@@ -377,9 +395,14 @@ async function sendTokens(
     const estimatedFee = fee?.value || 5000;
 
     // Send and confirm transaction
-    const signature = await sendAndConfirmTransaction(connection, transaction, [senderKeypair], {
-      commitment: 'confirmed',
-    });
+    const signature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [senderKeypair],
+      {
+        commitment: 'confirmed',
+      }
+    );
 
     return {
       signature,
@@ -387,7 +410,7 @@ async function sendTokens(
     };
   } catch (error) {
     throw new Error(
-      `Failed to send tokens: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to send tokens: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -397,7 +420,7 @@ async function getTransactionHistory(
   walletAddress: string,
   network: string = 'devnet',
   limit: number = 10,
-  before?: string,
+  before?: string
 ): Promise<
   Array<{
     signature: string;
@@ -441,7 +464,10 @@ async function getTransactionHistory(
     }
 
     // Get transaction signatures
-    const signatures = await connection.getSignaturesForAddress(walletPubKey, options);
+    const signatures = await connection.getSignaturesForAddress(
+      walletPubKey,
+      options
+    );
 
     if (signatures.length === 0) {
       return [];
@@ -453,7 +479,7 @@ async function getTransactionHistory(
 
     for (let i = 0; i < signatures.length; i += batchSize) {
       const batch = signatures.slice(i, i + batchSize);
-      const batchPromises = batch.map(async (sig) => {
+      const batchPromises = batch.map(async sig => {
         try {
           const tx = await connection.getParsedTransaction(sig.signature, {
             commitment: 'confirmed',
@@ -506,7 +532,9 @@ async function getTransactionHistory(
             const postTokens = tx.meta.postTokenBalances;
 
             for (const postToken of postTokens) {
-              const preToken = preTokens.find((pre) => pre.accountIndex === postToken.accountIndex);
+              const preToken = preTokens.find(
+                pre => pre.accountIndex === postToken.accountIndex
+              );
 
               if (preToken) {
                 const preAmount = Number(preToken.uiTokenAmount?.amount || 0);
@@ -517,7 +545,9 @@ async function getTransactionHistory(
                   result.tokenTransfers.push({
                     mint: postToken.mint,
                     change,
-                    uiChange: change / Math.pow(10, postToken.uiTokenAmount?.decimals || 0),
+                    uiChange:
+                      change /
+                      Math.pow(10, postToken.uiTokenAmount?.decimals || 0),
                     decimals: postToken.uiTokenAmount?.decimals,
                   });
                 }
@@ -528,7 +558,7 @@ async function getTransactionHistory(
           // Extract SOL transfer information
           if (tx.meta?.preBalances && tx.meta?.postBalances) {
             const accountIndex = tx.transaction.message.accountKeys.findIndex(
-              (key) => key.pubkey.toString() === walletAddress,
+              key => key.pubkey.toString() === walletAddress
             );
 
             if (accountIndex >= 0) {
@@ -543,13 +573,16 @@ async function getTransactionHistory(
           // Extract program information
           if (tx.transaction.message.instructions) {
             result.programs = tx.transaction.message.instructions.map(
-              (ix: { programId?: { toString(): string }; parsed?: { type?: string } }) => {
+              (ix: {
+                programId?: { toString(): string };
+                parsed?: { type?: string };
+              }) => {
                 const programId = ix.programId?.toString() || '';
                 return {
                   programId,
                   instructionType: ix.parsed?.type || 'unknown',
                 };
-              },
+              }
             );
           }
 
@@ -564,11 +597,15 @@ async function getTransactionHistory(
       });
 
       const batchResults = await Promise.all(batchPromises);
-      transactions.push(...batchResults.filter((tx): tx is NonNullable<typeof tx> => tx !== null));
+      transactions.push(
+        ...batchResults.filter(
+          (tx): tx is NonNullable<typeof tx> => tx !== null
+        )
+      );
 
       // Small delay between batches to be nice to the RPC
       if (i + batchSize < signatures.length) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
@@ -577,7 +614,7 @@ async function getTransactionHistory(
     throw new Error(
       `Failed to get transaction history: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 }
@@ -585,7 +622,7 @@ async function getTransactionHistory(
 // Check transaction status
 async function getTransactionStatus(
   signature: string,
-  network: string = 'devnet',
+  network: string = 'devnet'
 ): Promise<{
   signature: string;
   confirmationStatus: string | null;
@@ -630,13 +667,16 @@ async function getTransactionStatus(
       if (signatureStatus.value) {
         return {
           signature,
-          confirmationStatus: signatureStatus.value.confirmationStatus || 'processed',
+          confirmationStatus:
+            signatureStatus.value.confirmationStatus || 'processed',
           confirmations: signatureStatus.value.confirmations,
           slot: signatureStatus.value.slot,
           blockTime: null,
           fee: null,
           success: !signatureStatus.value.err,
-          error: signatureStatus.value.err ? JSON.stringify(signatureStatus.value.err) : null,
+          error: signatureStatus.value.err
+            ? JSON.stringify(signatureStatus.value.err)
+            : null,
           explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=${network}`,
         };
       }
@@ -650,14 +690,19 @@ async function getTransactionStatus(
       confirmations: null, // Not available in this context
       slot: transaction.slot || null,
       blockTime: transaction.blockTime ?? null,
-      fee: transaction.meta?.fee !== undefined ? transaction.meta.fee / LAMPORTS_PER_SOL : null,
+      fee:
+        transaction.meta?.fee !== undefined
+          ? transaction.meta.fee / LAMPORTS_PER_SOL
+          : null,
       success: !transaction.meta?.err,
-      error: transaction.meta?.err ? JSON.stringify(transaction.meta.err) : null,
+      error: transaction.meta?.err
+        ? JSON.stringify(transaction.meta.err)
+        : null,
       explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=${network}`,
     };
   } catch (error) {
     throw new Error(
-      `Failed to get transaction status: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to get transaction status: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -670,7 +715,7 @@ async function estimateTransactionFee(
   recipientAddress?: string,
   amount?: number,
   tokenMint?: string,
-  memo?: string,
+  memo?: string
 ): Promise<{
   estimatedFee: number;
   estimatedFeeInLamports: number;
@@ -693,7 +738,7 @@ async function estimateTransactionFee(
     if (transactionType === 'sol_transfer') {
       if (!recipientAddress || !amount) {
         throw new Error(
-          'Recipient address and amount are required for SOL transfer fee estimation',
+          'Recipient address and amount are required for SOL transfer fee estimation'
         );
       }
 
@@ -713,7 +758,9 @@ async function estimateTransactionFee(
         // Note: This is a simplified memo - in practice you'd use the memo program
         const memoInstruction = {
           keys: [],
-          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+          programId: new PublicKey(
+            'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
+          ),
           data: Buffer.from(memo, 'utf8'),
         };
         transaction.add(memoInstruction);
@@ -721,7 +768,7 @@ async function estimateTransactionFee(
     } else if (transactionType === 'token_transfer') {
       if (!recipientAddress || !amount || !tokenMint) {
         throw new Error(
-          'Recipient address, amount, and token mint are required for token transfer fee estimation',
+          'Recipient address, amount, and token mint are required for token transfer fee estimation'
         );
       }
 
@@ -737,13 +784,13 @@ async function estimateTransactionFee(
         TOKEN_PROGRAM_ID,
         TOKEN_PROGRAM_ID,
         mintPubKey,
-        senderPubKey,
+        senderPubKey
       );
       const recipientTokenAddress = await Token.getAssociatedTokenAddress(
         TOKEN_PROGRAM_ID,
         TOKEN_PROGRAM_ID,
         mintPubKey,
-        recipientPubKey,
+        recipientPubKey
       );
 
       // Check if recipient token account exists
@@ -758,11 +805,12 @@ async function estimateTransactionFee(
             mintPubKey,
             recipientTokenAddress,
             recipientPubKey,
-            senderPubKey,
-          ),
+            senderPubKey
+          )
         );
         includesTokenAccountCreation = true;
-        accountCreationFee = await connection.getMinimumBalanceForRentExemption(165); // Token account size
+        accountCreationFee =
+          await connection.getMinimumBalanceForRentExemption(165); // Token account size
       }
 
       // Add transfer instruction
@@ -774,8 +822,8 @@ async function estimateTransactionFee(
           recipientTokenAddress,
           senderPubKey,
           [],
-          transferAmount,
-        ),
+          transferAmount
+        )
       );
     } else {
       throw new Error(`Unsupported transaction type: ${transactionType}`);
@@ -801,7 +849,9 @@ async function estimateTransactionFee(
       breakdown: {
         baseFee: baseFeeInLamports / LAMPORTS_PER_SOL,
         accountCreationFee:
-          accountCreationFee > 0 ? accountCreationFee / LAMPORTS_PER_SOL : undefined,
+          accountCreationFee > 0
+            ? accountCreationFee / LAMPORTS_PER_SOL
+            : undefined,
         priorityFee: 0, // Could be extended to include priority fees
       },
     };
@@ -809,7 +859,7 @@ async function estimateTransactionFee(
     throw new Error(
       `Failed to estimate transaction fee: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 }
@@ -829,7 +879,7 @@ function resolvePrivateKey(providedKey?: string): string {
   const privateKey = providedKey || getDefaultPrivateKey();
   if (!privateKey) {
     throw new Error(
-      'Private key is required. Provide it as a parameter or set SOLANA_WALLET_PRIVATE_KEY environment variable.',
+      'Private key is required. Provide it as a parameter or set SOLANA_WALLET_PRIVATE_KEY environment variable.'
     );
   }
   return privateKey;
@@ -845,7 +895,7 @@ function validateKeyPair(privateKey: string, publicKey?: string): void {
 
     if (derivedPublicKey !== publicKey) {
       throw new Error(
-        'Security Error: Provided public key does not match the private key. This could be a malicious attempt.',
+        'Security Error: Provided public key does not match the private key. This could be a malicious attempt.'
       );
     }
   } catch (error) {
@@ -876,46 +926,57 @@ const solana = {
         'fee_estimation',
       ])
       .describe(
-        'Operation to perform: balance (check SOL balance), send (send SOL), receive (get wallet address), generate_wallet (create new wallet), token_balance (check SPL token balance), token_send (send SPL tokens), token_info (get token information), transaction_history (get transaction history), transaction_status (check transaction status), fee_estimation (estimate transaction fees)',
+        'Operation to perform: balance (check SOL balance), send (send SOL), receive (get wallet address), generate_wallet (create new wallet), token_balance (check SPL token balance), token_send (send SPL tokens), token_info (get token information), transaction_history (get transaction history), transaction_status (check transaction status), fee_estimation (estimate transaction fees)'
       ),
     network: z
       .enum(['devnet', 'testnet', 'mainnet-beta'])
       .optional()
-      .describe('Solana network to use (defaults to SOLANA_DEFAULT_NETWORK env var or devnet)'),
+      .describe(
+        'Solana network to use (defaults to SOLANA_DEFAULT_NETWORK env var or devnet)'
+      ),
     publicKey: z
       .string()
       .optional()
       .describe(
-        'Public key of the wallet to use (optional if SOLANA_WALLET_PUBLIC_KEY is set in environment)',
+        'Public key of the wallet to use (optional if SOLANA_WALLET_PUBLIC_KEY is set in environment)'
       ),
     privateKey: z
       .string()
       .optional()
       .describe(
-        'Base64 encoded private key (optional if SOLANA_WALLET_PRIVATE_KEY is set in environment)',
+        'Base64 encoded private key (optional if SOLANA_WALLET_PRIVATE_KEY is set in environment)'
       ),
     recipientAddress: z
       .string()
       .optional()
-      .describe('Recipient wallet address (required for send and token_send operations)'),
+      .describe(
+        'Recipient wallet address (required for send and token_send operations)'
+      ),
     amount: z
       .number()
       .positive()
       .optional()
-      .describe('Amount of SOL or tokens to send (required for send and token_send operations)'),
-    memo: z.string().optional().describe('Optional memo to include with the transaction'),
+      .describe(
+        'Amount of SOL or tokens to send (required for send and token_send operations)'
+      ),
+    memo: z
+      .string()
+      .optional()
+      .describe('Optional memo to include with the transaction'),
     tokenMint: z
       .string()
       .optional()
       .describe(
-        'SPL token mint address (required for token_balance, token_send, and token_info operations)',
+        'SPL token mint address (required for token_balance, token_send, and token_info operations)'
       ),
     tokenDecimals: z
       .number()
       .min(0)
       .max(18)
       .optional()
-      .describe('Token decimals (optional, will be fetched from mint if not provided)'),
+      .describe(
+        'Token decimals (optional, will be fetched from mint if not provided)'
+      ),
     limit: z
       .number()
       .min(1)
@@ -930,12 +991,14 @@ const solana = {
       .string()
       .optional()
       .describe(
-        'Transaction signature to check status (required for transaction_status operation)',
+        'Transaction signature to check status (required for transaction_status operation)'
       ),
     transactionType: z
       .enum(['sol_transfer', 'token_transfer'])
       .optional()
-      .describe('Type of transaction to estimate fees for (required for fee_estimation operation)'),
+      .describe(
+        'Type of transaction to estimate fees for (required for fee_estimation operation)'
+      ),
   }),
   execute: async ({
     operation,
@@ -954,7 +1017,9 @@ const solana = {
   }: SolanaParameters) => {
     // Resolve network and private key defaults
     const resolvedNetwork = network || getDefaultNetwork();
-    console.log(`[SOLANA] Executing operation: ${operation} on ${resolvedNetwork}`);
+    console.log(
+      `[SOLANA] Executing operation: ${operation} on ${resolvedNetwork}`
+    );
 
     try {
       switch (operation) {
@@ -968,7 +1033,8 @@ const solana = {
               privateKey: wallet.privateKey,
             },
             network: resolvedNetwork,
-            message: 'New wallet generated successfully. Store the private key securely!',
+            message:
+              'New wallet generated successfully. Store the private key securely!',
             warning:
               'NEVER share your private key. Anyone with access to it can control your wallet.',
           });
@@ -979,10 +1045,13 @@ const solana = {
           validateKeyPair(resolvedPrivateKey, publicKey);
           const wallet = getWalletFromPrivateKey(resolvedPrivateKey);
           const walletAddress = publicKey || wallet.publicKey.toString();
-          const enhancedBalance = await getEnhancedBalance(walletAddress, resolvedNetwork);
+          const enhancedBalance = await getEnhancedBalance(
+            walletAddress,
+            resolvedNetwork
+          );
           const spendableBalance = Math.max(
             0,
-            enhancedBalance.balance - enhancedBalance.rentExemptReserve,
+            enhancedBalance.balance - enhancedBalance.rentExemptReserve
           );
 
           return JSON.stringify({
@@ -998,7 +1067,7 @@ const solana = {
             accountExists: enhancedBalance.accountExists,
             network: resolvedNetwork,
             message: `Wallet balance: ${enhancedBalance.balance} SOL (${spendableBalance.toFixed(
-              6,
+              6
             )} spendable)`,
           });
         }
@@ -1041,15 +1110,20 @@ const solana = {
           const senderWallet = getWalletFromPrivateKey(resolvedPrivateKey);
           const senderAddress = publicKey || senderWallet.publicKey.toString();
           if (recipientAddress === senderAddress) {
-            throw new Error('Security Warning: Cannot send SOL to the same wallet address');
+            throw new Error(
+              'Security Warning: Cannot send SOL to the same wallet address'
+            );
           }
 
           // Check sender balance first
-          const senderBalance = await getBalance(senderAddress, resolvedNetwork);
+          const senderBalance = await getBalance(
+            senderAddress,
+            resolvedNetwork
+          );
 
           if (senderBalance < amount) {
             throw new Error(
-              `Insufficient balance. Current: ${senderBalance} SOL, Required: ${amount} SOL`,
+              `Insufficient balance. Current: ${senderBalance} SOL, Required: ${amount} SOL`
             );
           }
 
@@ -1059,7 +1133,7 @@ const solana = {
             recipientAddress,
             amount,
             resolvedNetwork,
-            memo,
+            memo
           );
 
           return JSON.stringify({
@@ -1079,7 +1153,9 @@ const solana = {
 
         case 'token_balance': {
           if (!tokenMint) {
-            throw new Error('Token mint address is required for token_balance operation');
+            throw new Error(
+              'Token mint address is required for token_balance operation'
+            );
           }
 
           const resolvedPrivateKey = resolvePrivateKey(privateKey);
@@ -1087,7 +1163,11 @@ const solana = {
           const wallet = getWalletFromPrivateKey(resolvedPrivateKey);
           const walletAddress = publicKey || wallet.publicKey.toString();
 
-          const tokenBalance = await getTokenBalance(walletAddress, tokenMint, resolvedNetwork);
+          const tokenBalance = await getTokenBalance(
+            walletAddress,
+            tokenMint,
+            resolvedNetwork
+          );
 
           return JSON.stringify({
             success: true,
@@ -1104,7 +1184,9 @@ const solana = {
 
         case 'token_info': {
           if (!tokenMint) {
-            throw new Error('Token mint address is required for token_info operation');
+            throw new Error(
+              'Token mint address is required for token_info operation'
+            );
           }
 
           const tokenInfo = await getTokenInfo(tokenMint, resolvedNetwork);
@@ -1124,13 +1206,19 @@ const solana = {
           validateKeyPair(resolvedPrivateKey, publicKey);
 
           if (!tokenMint) {
-            throw new Error('Token mint address is required for token_send operation');
+            throw new Error(
+              'Token mint address is required for token_send operation'
+            );
           }
           if (!recipientAddress) {
-            throw new Error('Recipient address is required for token_send operation');
+            throw new Error(
+              'Recipient address is required for token_send operation'
+            );
           }
           if (!amount || amount <= 0) {
-            throw new Error('Valid amount is required for token_send operation');
+            throw new Error(
+              'Valid amount is required for token_send operation'
+            );
           }
 
           // Validate recipient address
@@ -1151,18 +1239,20 @@ const solana = {
           const senderWallet = getWalletFromPrivateKey(resolvedPrivateKey);
           const senderAddress = publicKey || senderWallet.publicKey.toString();
           if (recipientAddress === senderAddress) {
-            throw new Error('Security Warning: Cannot send tokens to the same wallet address');
+            throw new Error(
+              'Security Warning: Cannot send tokens to the same wallet address'
+            );
           }
 
           // Check sender token balance first
           const senderTokenBalance = await getTokenBalance(
             senderAddress,
             tokenMint,
-            resolvedNetwork,
+            resolvedNetwork
           );
           if (senderTokenBalance.uiAmount < amount) {
             throw new Error(
-              `Insufficient token balance. Current: ${senderTokenBalance.uiAmount} tokens, Required: ${amount} tokens`,
+              `Insufficient token balance. Current: ${senderTokenBalance.uiAmount} tokens, Required: ${amount} tokens`
             );
           }
 
@@ -1173,7 +1263,7 @@ const solana = {
             tokenMint,
             amount,
             resolvedDecimals,
-            resolvedNetwork,
+            resolvedNetwork
           );
 
           return JSON.stringify({
@@ -1203,7 +1293,7 @@ const solana = {
             walletAddress,
             resolvedNetwork,
             historyLimit,
-            before,
+            before
           );
 
           return JSON.stringify({
@@ -1220,7 +1310,9 @@ const solana = {
 
         case 'transaction_status': {
           if (!signature) {
-            throw new Error('Transaction signature is required for transaction_status operation');
+            throw new Error(
+              'Transaction signature is required for transaction_status operation'
+            );
           }
 
           const status = await getTransactionStatus(signature, resolvedNetwork);
@@ -1246,7 +1338,9 @@ const solana = {
 
         case 'fee_estimation': {
           if (!transactionType) {
-            throw new Error('Transaction type is required for fee_estimation operation');
+            throw new Error(
+              'Transaction type is required for fee_estimation operation'
+            );
           }
 
           const resolvedPrivateKey = resolvePrivateKey(privateKey);
@@ -1261,7 +1355,7 @@ const solana = {
             recipientAddress,
             amount,
             tokenMint,
-            memo,
+            memo
           );
 
           return JSON.stringify({
@@ -1271,11 +1365,14 @@ const solana = {
             transactionType: feeEstimation.transactionType,
             estimatedFee: feeEstimation.estimatedFee,
             estimatedFeeInLamports: feeEstimation.estimatedFeeInLamports,
-            includesTokenAccountCreation: feeEstimation.includesTokenAccountCreation,
+            includesTokenAccountCreation:
+              feeEstimation.includesTokenAccountCreation,
             breakdown: feeEstimation.breakdown,
             network: resolvedNetwork,
             message: `Estimated fee: ${feeEstimation.estimatedFee.toFixed(6)} SOL${
-              feeEstimation.includesTokenAccountCreation ? ' (includes token account creation)' : ''
+              feeEstimation.includesTokenAccountCreation
+                ? ' (includes token account creation)'
+                : ''
             }`,
           });
         }

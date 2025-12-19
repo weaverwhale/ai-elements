@@ -1,6 +1,8 @@
 import type { ToolMetadata } from '../tools/index';
 
-export const createDefaultSystemPrompt = (toolsMetadata: Record<string, ToolMetadata>) => `
+export const createDefaultSystemPrompt = (
+  toolsMetadata: Record<string, ToolMetadata>
+) => `
 # Introduction
 You are a helpful AI assistant, with a suite of tools to help you assist the user in many ways.
 Your mission is to assist without revealing your AI origins or internal reasoning. 
@@ -13,7 +15,7 @@ The date and time are ${new Date().toLocaleDateString()}
 ## Tools
 You have access to the following tools:
 ${Object.values(toolsMetadata)
-  .map((tool) => `- ${tool.name} (${tool.id}): ${tool.description}`)
+  .map(tool => `- ${tool.name} (${tool.id}): ${tool.description}`)
   .join('\n')}
 You have access to a suite of powerful tools to help you assist the user.
 

@@ -43,7 +43,9 @@ if (!fs.existsSync(VIDEOS_DIR)) {
 }
 
 async function generateWithVeo(prompt: string): Promise<{ videos: string[] }> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY });
+  const ai = new GoogleGenAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  });
 
   let operation = await ai.models.generateVideos({
     model: VIDEO_MODELS.veo,
@@ -55,36 +57,38 @@ async function generateWithVeo(prompt: string): Promise<{ videos: string[] }> {
   });
 
   while (!operation.done) {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
     operation = await ai.operations.getVideosOperation({
       operation: operation,
     });
   }
 
   const videoUrls = await Promise.all(
-    operation.response?.generatedVideos?.map(async (generatedVideo: GeneratedVideo) => {
-      if (!generatedVideo.video?.uri) {
-        throw new Error('Generated video URI is missing');
+    operation.response?.generatedVideos?.map(
+      async (generatedVideo: GeneratedVideo) => {
+        if (!generatedVideo.video?.uri) {
+          throw new Error('Generated video URI is missing');
+        }
+
+        const response = await fetch(
+          `${generatedVideo.video.uri}&key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch video: ${response.statusText}`);
+        }
+
+        // Generate a unique filename
+        const filename = `${crypto.randomUUID()}.mp4`;
+        const filepath = path.join(VIDEOS_DIR, filename);
+
+        // Download and save the video
+        const buffer = await response.arrayBuffer();
+        fs.writeFileSync(filepath, Buffer.from(buffer));
+
+        return `/uploads/${filename}`;
       }
-
-      const response = await fetch(
-        `${generatedVideo.video.uri}&key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`,
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch video: ${response.statusText}`);
-      }
-
-      // Generate a unique filename
-      const filename = `${crypto.randomUUID()}.mp4`;
-      const filepath = path.join(VIDEOS_DIR, filename);
-
-      // Download and save the video
-      const buffer = await response.arrayBuffer();
-      fs.writeFileSync(filepath, Buffer.from(buffer));
-
-      return `/uploads/${filename}`;
-    }) ?? [],
+    ) ?? []
   );
 
   return { videos: videoUrls };

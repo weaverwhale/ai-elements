@@ -20,13 +20,19 @@ const chartGenerator = {
     data: z
       .array(z.array(z.union([z.string(), z.number()])))
       .describe(
-        'Array of data points. For line/bar: [[label, value], ...]. For pie: [[label, value], ...]. For sankey: [[source, target, value], ...]. For git: [[action, params...], ...]',
+        'Array of data points. For line/bar: [[label, value], ...]. For pie: [[label, value], ...]. For sankey: [[source, target, value], ...]. For git: [[action, params...], ...]'
       ),
     title: z.string().optional().describe('Chart title'),
     xLabel: z.string().optional().describe('X-axis label'),
     yLabel: z.string().optional().describe('Y-axis label'),
   }),
-  execute: async ({ type, data, title, xLabel, yLabel }: ChartGeneratorParams) => {
+  execute: async ({
+    type,
+    data,
+    title,
+    xLabel,
+    yLabel,
+  }: ChartGeneratorParams) => {
     try {
       let mermaidCode = '';
 
@@ -70,7 +76,7 @@ function generateLineChart(
   data: Array<Array<string | number>>,
   title?: string,
   xLabel?: string,
-  yLabel?: string,
+  yLabel?: string
 ): string {
   // Extract labels and values from data
   const labels = data.map(([x]) => x?.toString() || '');
@@ -87,10 +93,12 @@ function generateLineChart(
   }
 
   // Add x-axis with labels
-  chart += `x-axis "${xLabel || ''}" [${labels.map((l) => `"${l}"`).join(',')}]\n`;
+  chart += `x-axis "${xLabel || ''}" [${labels
+    .map(l => `"${l}"`)
+    .join(',')}]\n`;
 
   // Calculate y-axis range with validation
-  const validValues = values.filter((v) => !isNaN(v));
+  const validValues = values.filter(v => !isNaN(v));
   const minY = Math.min(...validValues);
   const maxY = Math.max(...validValues);
 
@@ -109,7 +117,7 @@ function generateBarChart(
   data: Array<Array<string | number>>,
   title?: string,
   xLabel?: string,
-  yLabel?: string,
+  yLabel?: string
 ): string {
   // Extract labels and values from data, ensuring numeric conversion
   const labels = data.map(([x]) => x?.toString() || '');
@@ -120,7 +128,7 @@ function generateBarChart(
 
   // Determine Y-axis range
   const minY = 0;
-  const maxY = Math.ceil(Math.max(...values.filter((v) => !isNaN(v))) * 1.2); // Adding 20% padding
+  const maxY = Math.ceil(Math.max(...values.filter(v => !isNaN(v))) * 1.2); // Adding 20% padding
 
   // Construct the chart string
   let chart = 'xychart-beta\n';
@@ -130,7 +138,9 @@ function generateBarChart(
   }
 
   // Add x-axis with labels
-  chart += `x-axis "${xLabel || ''}" [${labels.map((l) => `"${l}"`).join(',')}]\n`;
+  chart += `x-axis "${xLabel || ''}" [${labels
+    .map(l => `"${l}"`)
+    .join(',')}]\n`;
 
   // Add y-axis with validated range
   chart += `y-axis "${yLabel || ''}" ${minY} --> ${maxY || 1}\n`; // Default to 1 if maxY is invalid
@@ -141,7 +151,10 @@ function generateBarChart(
   return chart;
 }
 
-function generatePieChart(data: Array<Array<string | number>>, title?: string): string {
+function generatePieChart(
+  data: Array<Array<string | number>>,
+  title?: string
+): string {
   let chart = 'pie\n';
   if (title) chart += `    title "${title}"\n`;
 
@@ -152,7 +165,10 @@ function generatePieChart(data: Array<Array<string | number>>, title?: string): 
   return chart;
 }
 
-function generateGanttChart(data: Array<Array<string | number>>, title?: string): string {
+function generateGanttChart(
+  data: Array<Array<string | number>>,
+  title?: string
+): string {
   let chart = 'gantt\n';
   if (title) chart += `    title "${title}"\n`;
   chart += '    dateFormat YYYY-MM-DD\n';
@@ -180,7 +196,7 @@ function generateGitGraph(data: Array<Array<string | number>>): string {
   let chart = 'gitGraph\n';
 
   // Process each action in the data array
-  data.forEach((row) => {
+  data.forEach(row => {
     const action = row[0].toString().toLowerCase();
     let line = '    ';
 

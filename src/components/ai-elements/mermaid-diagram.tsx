@@ -52,7 +52,7 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ chart }) => {
           .run({
             nodes: [diagramDiv],
           })
-          .catch((error) => {
+          .catch(error => {
             console.error('Mermaid rendering error:', error);
             if (containerRef.current) {
               containerRef.current.innerHTML = `<div class="mermaid-error">Error rendering diagram: ${error.message}</div>`;

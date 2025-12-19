@@ -97,7 +97,7 @@ export const CodeBlock = ({
       <div
         className={cn(
           'relative w-full overflow-hidden rounded-md border bg-background text-foreground',
-          className,
+          className
         )}
         {...props}
       >
@@ -114,7 +114,9 @@ export const CodeBlock = ({
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
           />
           {children && (
-            <div className="absolute top-2 right-2 flex items-center gap-2">{children}</div>
+            <div className="absolute top-2 right-2 flex items-center gap-2">
+              {children}
+            </div>
           )}
         </div>
       </div>

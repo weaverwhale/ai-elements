@@ -33,7 +33,9 @@ async function testSolanaOperations() {
     console.log('');
 
     console.log('✅ All tests completed!');
-    console.log('💡 To test sending, fund your wallet first and then use the send operation.');
+    console.log(
+      '💡 To test sending, fund your wallet first and then use the send operation.'
+    );
   } catch (error) {
     console.error('❌ Error testing Solana tool:', error);
   }

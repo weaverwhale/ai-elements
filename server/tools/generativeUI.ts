@@ -24,11 +24,13 @@ const generativeUi = {
     description: z
       .string()
       .describe(
-        'A detailed natural language description of the desired UI component. Should generate a complete React component that uses real data from the conversation context. Do NOT generate wrapper components that import other components. Include specific layout, elements, and styling instructions (Tailwind CSS).',
+        'A detailed natural language description of the desired UI component. Should generate a complete React component that uses real data from the conversation context. Do NOT generate wrapper components that import other components. Include specific layout, elements, and styling instructions (Tailwind CSS).'
       ),
     conversationHistory: z
       .array(messageSchema) // Validate as an array of messages
-      .describe('The history of the conversation leading up to this UI generation request.'),
+      .describe(
+        'The history of the conversation leading up to this UI generation request.'
+      ),
   }),
   execute: async ({
     description,
@@ -40,7 +42,7 @@ const generativeUi = {
       const modelProvider = getModelProviderById(UI_GENERATION_MODEL_ID);
       if (!modelProvider || !modelProvider.available) {
         throw new Error(
-          `UI Generation model provider '${UI_GENERATION_MODEL_ID}' is not available or configured. Check API keys.`,
+          `UI Generation model provider '${UI_GENERATION_MODEL_ID}' is not available or configured. Check API keys.`
         );
       }
       const model = modelProvider.model;
@@ -68,19 +70,22 @@ const generativeUi = {
         generatedCode.startsWith('function ') ||
         generatedCode.includes('=>');
 
-      if (!isComponent && (!generatedCode.startsWith('<') || !generatedCode.endsWith('>'))) {
+      if (
+        !isComponent &&
+        (!generatedCode.startsWith('<') || !generatedCode.endsWith('>'))
+      ) {
         console.warn(
           `[GenerativeUI Tool] Output doesn't look like JSX or React component: ${generatedCode.substring(
             0,
-            100,
-          )}...`,
+            100
+          )}...`
         );
       }
 
       console.log(
         `[GenerativeUI Tool] Generated ${
           isComponent ? 'React component' : 'JSX'
-        }: ${generatedCode.substring(0, 100)}...`,
+        }: ${generatedCode.substring(0, 100)}...`
       );
       return generatedCode;
     } catch (error) {

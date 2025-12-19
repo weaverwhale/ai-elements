@@ -45,7 +45,8 @@ export const useSuggestions = (options: UseSuggestionsOptions = {}) => {
       setSuggestions(data.suggestions);
       setCategories(data.categories);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       console.error('Error fetching suggestions:', err);
 

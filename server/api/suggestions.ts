@@ -94,8 +94,8 @@ export const handleSuggestionsRequest = async (req: Request, res: Response) => {
 
     // Filter by category if provided
     if (category && typeof category === 'string') {
-      suggestions = suggestions.filter((s) =>
-        s.category?.toLowerCase().includes(category.toLowerCase()),
+      suggestions = suggestions.filter(s =>
+        s.category?.toLowerCase().includes(category.toLowerCase())
       );
     }
 
@@ -106,12 +106,16 @@ export const handleSuggestionsRequest = async (req: Request, res: Response) => {
     }
 
     // Shuffle suggestions to provide variety
-    const shuffledSuggestions = [...suggestions].sort(() => Math.random() - 0.5);
+    const shuffledSuggestions = [...suggestions].sort(
+      () => Math.random() - 0.5
+    );
 
     res.json({
       suggestions: shuffledSuggestions,
       total: suggestions.length,
-      categories: [...new Set(DEFAULT_SUGGESTIONS.map((s) => s.category).filter(Boolean))],
+      categories: [
+        ...new Set(DEFAULT_SUGGESTIONS.map(s => s.category).filter(Boolean)),
+      ],
     });
   } catch (error) {
     console.error('[SERVER] Error getting suggestions:', error);

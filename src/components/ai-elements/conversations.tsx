@@ -14,7 +14,9 @@ interface SearchableConversationDropdownProps {
   isSaving?: boolean;
 }
 
-export const SearchableConversationDropdown: React.FC<SearchableConversationDropdownProps> = ({
+export const SearchableConversationDropdown: React.FC<
+  SearchableConversationDropdownProps
+> = ({
   conversations,
   onSelectConversation,
   onDeleteConversation,
@@ -24,14 +26,18 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
   const [isOpen, setIsOpen] = useState(false);
   const [isPositioned, setIsPositioned] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, showAbove: false });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    showAbove: false,
+  });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter conversations based on search query
-  const filteredConversations = conversations.filter((conv) =>
-    conv.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredConversations = conversations.filter(conv =>
+    conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Calculate dropdown position based on trigger button
@@ -138,9 +144,14 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
     setSearchQuery('');
   };
 
-  const handleDeleteConversation = async (e: React.MouseEvent, conversationId: string) => {
+  const handleDeleteConversation = async (
+    e: React.MouseEvent,
+    conversationId: string
+  ) => {
     e.stopPropagation();
-    if (await window.confirm('Are you sure you want to delete this conversation?')) {
+    if (
+      await window.confirm('Are you sure you want to delete this conversation?')
+    ) {
       onDeleteConversation(e, conversationId);
     }
   };
@@ -161,7 +172,9 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
         style={{
           top: `${dropdownPosition.top}px`,
           left: `${dropdownPosition.left}px`,
-          transform: dropdownPosition.showAbove ? 'translateY(-100%)' : 'translateY(0)',
+          transform: dropdownPosition.showAbove
+            ? 'translateY(-100%)'
+            : 'translateY(0)',
         }}
       >
         <div className="p-4 border-b">
@@ -172,7 +185,7 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
               type="text"
               placeholder={`Search ${conversations.length} conversations...`}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="pl-10 h-9"
             />
           </div>
@@ -181,11 +194,13 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
         <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
           {filteredConversations.length === 0 ? (
             <div className="p-4 text-sm text-muted-foreground text-center">
-              {searchQuery ? 'No conversations match your search' : 'No conversations found'}
+              {searchQuery
+                ? 'No conversations match your search'
+                : 'No conversations found'}
             </div>
           ) : (
             <div className="p-2">
-              {filteredConversations.map((conv) => (
+              {filteredConversations.map(conv => (
                 <div
                   key={conv.id}
                   onClick={() => handleSelectConversation(conv.id)}
@@ -196,7 +211,8 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
                       {conv.title}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {conv.messageCount} messages • {conv.updatedAt.toLocaleDateString()}
+                      {conv.messageCount} messages •{' '}
+                      {conv.updatedAt.toLocaleDateString()}
                     </span>
                   </div>
 
@@ -204,7 +220,7 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
                     variant="ghost"
                     size="sm"
                     className="absolute top-2 right-2 opacity-0 group-hover/item:opacity-100 transition-opacity h-7 w-7 p-0 shrink-0 z-10  text-muted-foreground hover:text-red-500 transition-colors"
-                    onMouseDown={(e) => handleDeleteConversation(e, conv.id)}
+                    onMouseDown={e => handleDeleteConversation(e, conv.id)}
                     title="Delete Conversation"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -227,9 +243,12 @@ export const SearchableConversationDropdown: React.FC<SearchableConversationDrop
         className="cursor-pointer"
         title="Conversation History"
       >
-        <History className={cn('size-4', (isLoading || isSaving) && 'animate-pulse')} />
+        <History
+          className={cn('size-4', (isLoading || isSaving) && 'animate-pulse')}
+        />
       </Button>
-      {typeof document !== 'undefined' && createPortal(dropdownContent, document.body)}
+      {typeof document !== 'undefined' &&
+        createPortal(dropdownContent, document.body)}
     </>
   );
 };

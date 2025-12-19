@@ -108,7 +108,9 @@ const DANGEROUS_PATTERNS = [
   /bash.*<.*\(/i,
 ];
 
-const validateCommand = (command: string): { isValid: boolean; reason?: string } => {
+const validateCommand = (
+  command: string
+): { isValid: boolean; reason?: string } => {
   const trimmedCommand = command.trim();
 
   if (!trimmedCommand) {
@@ -118,15 +120,18 @@ const validateCommand = (command: string): { isValid: boolean; reason?: string }
   // Check for dangerous patterns
   for (const pattern of DANGEROUS_PATTERNS) {
     if (pattern.test(trimmedCommand)) {
-      return { isValid: false, reason: 'Command contains potentially dangerous operations' };
+      return {
+        isValid: false,
+        reason: 'Command contains potentially dangerous operations',
+      };
     }
   }
 
   // Split command on operators to handle chaining (&&, ||, ;, |)
   const commandParts = trimmedCommand
     .split(/[;&|]+/)
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
 
   for (const part of commandParts) {
     // Skip empty parts or just whitespace
@@ -137,10 +142,10 @@ const validateCommand = (command: string): { isValid: boolean; reason?: string }
 
     // Check if the base command is in the allowed list
     const isAllowed = ALLOWED_COMMANDS.some(
-      (allowed) =>
+      allowed =>
         baseCommand === allowed ||
         baseCommand.endsWith(`/${allowed}`) ||
-        baseCommand.endsWith(`\\${allowed}`),
+        baseCommand.endsWith(`\\${allowed}`)
     );
 
     if (!isAllowed) {
@@ -154,7 +159,12 @@ const validateCommand = (command: string): { isValid: boolean; reason?: string }
   return { isValid: true };
 };
 
-const logExecution = (command: string, success: boolean, output: string, error?: string) => {
+const logExecution = (
+  command: string,
+  success: boolean,
+  output: string,
+  error?: string
+) => {
   const timestamp = new Date().toISOString();
   const logEntry = {
     timestamp,
@@ -172,7 +182,9 @@ const executor = {
   description:
     'Execute safe system commands based on requests. Only allows whitelisted commands for security.',
   inputSchema: z.object({
-    request: z.string().describe('The request to create a safe system command for'),
+    request: z
+      .string()
+      .describe('The request to create a safe system command for'),
     workingDirectory: z
       .string()
       .optional()
@@ -182,7 +194,11 @@ const executor = {
       .optional()
       .describe('Timeout in milliseconds (default: 30000, max: 120000)'),
   }),
-  execute: async ({ request, workingDirectory, timeout = 30000 }: ExecutorParameters) => {
+  execute: async ({
+    request,
+    workingDirectory,
+    timeout = 30000,
+  }: ExecutorParameters) => {
     try {
       // Validate timeout
       const maxTimeout = 120000; // 2 minutes
@@ -245,14 +261,16 @@ const executor = {
       let output = '';
       if (stdout) output += `📤 Output:\n${stdout}`;
       if (stderr) output += `⚠️ Warnings:\n${stderr}`;
-      if (!stdout && !stderr) output = '✅ Command executed successfully (no output)';
+      if (!stdout && !stderr)
+        output = '✅ Command executed successfully (no output)';
 
       output += `\n⏱️ Execution time: ${executionTime}ms`;
 
       logExecution(command, true, (stdout || '') + (stderr || ''));
       return output;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
       let userFriendlyError = '';
 
       if (errorMessage.includes('ENOENT')) {

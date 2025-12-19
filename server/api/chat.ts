@@ -20,19 +20,27 @@ interface ChatRequest {
 }
 
 // Agent factory function
-async function getAgent(modelId: string, userId: string, messages: UIMessage[]) {
+async function getAgent(
+  modelId: string,
+  userId: string,
+  messages: UIMessage[]
+) {
   const modelProvider = getModelProviderById(modelId);
   if (!modelProvider) {
     throw new Error(`Model provider '${modelId}' not found`);
   }
   if (!modelProvider.available) {
-    throw new Error(`Model provider '${modelId}' is not available. API key might be missing.`);
+    throw new Error(
+      `Model provider '${modelId}' is not available. API key might be missing.`
+    );
   }
 
   // Get memory context if user has messages
   let memoryContext = '';
   if (messages.length > 0) {
-    const lastUserMessage = [...messages].reverse().find((msg) => msg.role === 'user');
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find(msg => msg.role === 'user');
 
     if (lastUserMessage) {
       const query = extractTextContent(lastUserMessage);
@@ -68,8 +76,8 @@ export async function handleChatRequest(body: ChatRequest) {
     const agent = await getAgent(modelId, userId, body.messages);
 
     // Store to memory in background (non-blocking)
-    storeToMemoryAsync(userId, body.messages).catch((err) =>
-      console.error('[API] Background memory storage failed:', err),
+    storeToMemoryAsync(userId, body.messages).catch(err =>
+      console.error('[API] Background memory storage failed:', err)
     );
 
     if (isStream) {
@@ -77,13 +85,13 @@ export async function handleChatRequest(body: ChatRequest) {
 
       return createAgentUIStreamResponse({
         agent,
-        messages: body.messages,
+        uiMessages: body.messages,
       });
     } else {
       // For non-streaming, use agent.generate() with messages
       console.log('[API] Generating agent response');
 
-      const modelMessages = convertToModelMessages(body.messages);
+      const modelMessages = await convertToModelMessages(body.messages);
 
       const result = await agent.generate({
         messages: modelMessages,

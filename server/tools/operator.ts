@@ -10,22 +10,26 @@ type OperatorParams = {
 const operator = {
   id: 'operator',
   name: 'Operator',
-  description: 'Visit a website and perform an action using computer automation.',
+  description:
+    'Visit a website and perform an action using computer automation.',
   inputSchema: z.object({
     website: z
       .string()
       .describe(
-        'The website to visit. If not provided, the default is google.com. Should be a valid URL.',
+        'The website to visit. If not provided, the default is google.com. Should be a valid URL.'
       ),
     action: z.string().describe('The action to perform on the website.'),
   }),
   execute: async ({ website, action }: OperatorParams) => {
-    console.log(`[Operator Tool] Request received. Visiting ${website} and performing "${action}"`);
+    console.log(
+      `[Operator Tool] Request received. Visiting ${website} and performing "${action}"`
+    );
 
     try {
       const { default: OpenAI } = await import('openai');
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const targetUrl = website && website.trim().length > 0 ? website : 'https://google.com';
+      const targetUrl =
+        website && website.trim().length > 0 ? website : 'https://google.com';
 
       const userTask = `Visit: ${targetUrl}\nGoal: ${action}`;
 

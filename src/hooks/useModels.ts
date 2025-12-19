@@ -38,10 +38,13 @@ export function useModels(): UseModelsResult {
         setAvailableModels(modelsData.models);
 
         if (modelsData.models.length === 0) {
-          setModelError('No AI models are available. Please check your API keys.');
+          setModelError(
+            'No AI models are available. Please check your API keys.'
+          );
         } else if (
           modelsData.models.length > 0 &&
-          (!selectedModel || !modelsData.models.find((m: Model) => m.id === selectedModel))
+          (!selectedModel ||
+            !modelsData.models.find((m: Model) => m.id === selectedModel))
         ) {
           setSelectedModel(modelsData.models[0].id);
           setModelError(null);
@@ -52,7 +55,9 @@ export function useModels(): UseModelsResult {
         setModelError('Failed to retrieve model information from the server.');
       }
     } catch {
-      setModelError('Failed to fetch available AI models. Please try again later.');
+      setModelError(
+        'Failed to fetch available AI models. Please try again later.'
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -17,7 +17,8 @@ type MobyParams = {
 const moby = {
   id: 'moby',
   name: 'Moby',
-  description: "Useful for getting e-commerce analytics and insights from Triple Whale's AI, Moby.",
+  description:
+    "Useful for getting e-commerce analytics and insights from Triple Whale's AI, Moby.",
   inputSchema: z.object({
     question: z
       .string()
@@ -28,7 +29,10 @@ const moby = {
       .optional()
       .describe('Shopify store URL')
       .default('westside-barbell.myshopify.com'),
-    parentMessageId: z.string().optional().describe('Parent message ID for conversation context'),
+    parentMessageId: z
+      .string()
+      .optional()
+      .describe('Parent message ID for conversation context'),
   }),
   execute: async ({ question, shopId, parentMessageId }: MobyParams) => {
     console.log('[API] Executing moby tool with params:', question, shopId);
@@ -59,7 +63,8 @@ const moby = {
       }
 
       const data = (await response.json()) as { messages: { text: string }[] };
-      const lastMessageText = data.messages?.[data.messages.length - 1]?.text + ' ';
+      const lastMessageText =
+        data.messages?.[data.messages.length - 1]?.text + ' ';
 
       return lastMessageText || 'No answer received from Moby. ';
     } catch (error) {

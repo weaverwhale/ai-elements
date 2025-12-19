@@ -31,7 +31,9 @@ export interface ModelProvider {
 const checkApiKey = (key: string | undefined, provider: string): boolean => {
   const exists = !!key;
   if (!exists) {
-    console.warn(`[API] ${provider}_API_KEY is not set in environment variables`);
+    console.warn(
+      `[API] ${provider}_API_KEY is not set in environment variables`
+    );
   }
   return exists;
 };
@@ -194,9 +196,9 @@ export function getModelProviders(): ModelProvider[] {
 }
 
 export function getModelProviderById(id: string): ModelProvider | undefined {
-  return getModelProviders().find((provider) => provider.id === id);
+  return getModelProviders().find(provider => provider.id === id);
 }
 
 export function getAvailableModelProviders(): ModelProvider[] {
-  return getModelProviders().filter((provider) => provider.available);
+  return getModelProviders().filter(provider => provider.available);
 }
