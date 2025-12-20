@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @source "../node_modules/streamdown/dist/index.js";
