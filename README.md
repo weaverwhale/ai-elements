@@ -40,7 +40,16 @@ This will start both the frontend and backend servers using concurrently.
 
 ## Screenshots
 
-![Chatbot Input](public/screenshots/ss1.png)
-![Chatbot Input](public/screenshots/ss2.png)
-![Chatbot Input](public/screenshots/ss3.png)
-![Chatbot Input](public/screenshots/ss4.png)
+![Main Chat Input](public/screenshots/ss1.png)
+
+---
+
+![Conversation + Tool Calls](public/screenshots/ss2.png)
+
+---
+
+![Request Generative UI](public/screenshots/ss3.png)
+
+---
+
+![Generative UI Output Page](public/screenshots/ss4.png)
