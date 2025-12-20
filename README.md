@@ -37,3 +37,10 @@ This will start both the frontend and backend servers using concurrently.
 
 - The React frontend will be available at: http://localhost:5173
 - The Express API runs at: http://localhost:1753
+
+## Screenshots
+
+![Chatbot Input](public/screenshots/ss1.png)
+![Chatbot Input](public/screenshots/ss2.png)
+![Chatbot Input](public/screenshots/ss3.png)
+![Chatbot Input](public/screenshots/ss4.png)

@@ -22,7 +22,7 @@ import { Children } from 'react';
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
-  <div className="p-2 w-full max-w-4xl mx-auto">
+  <div className="p-2 pt-0 w-full max-w-4xl mx-auto">
     <form
       className={cn(
         'w-full divide-y overflow-hidden rounded-xl border shadow-sm',
