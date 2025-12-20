@@ -208,10 +208,10 @@ export const Chatbot = () => {
   ]);
 
   return (
-    <div className="max-w-4xl mx-auto relative size-full h-dvh">
+    <div className="relative size-full h-dvh">
       <div className="flex flex-col h-full">
         <Conversation className="h-full">
-          <ConversationContent>
+          <ConversationContent className="max-w-4xl mx-auto">
             {messages.map((message, index) => (
               <div key={message.id}>
                 {message.role === 'assistant' &&
@@ -356,7 +356,7 @@ export const Chatbot = () => {
         </Conversation>
 
         {messages.length === 0 && (
-          <Suggestions>
+          <Suggestions className="max-w-4xl mx-auto">
             {isLoading
               ? Array.from({ length: 6 }).map((_, index) => (
                   <Suggestion
@@ -381,7 +381,7 @@ export const Chatbot = () => {
           </Suggestions>
         )}
 
-        <PromptInput onSubmit={handleSubmit}>
+        <PromptInput onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <PromptInputTextarea
             ref={textareaRef}
             onChange={e => setInput(e.target.value)}
