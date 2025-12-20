@@ -356,7 +356,7 @@ export const Chatbot = () => {
         </Conversation>
 
         {messages.length === 0 && (
-          <Suggestions className="max-w-4xl mx-auto overflow-x-auto">
+          <Suggestions className="max-w-4xl mx-auto overflow-x-auto pb-2 scrollbar-none">
             {isLoading
               ? Array.from({ length: 6 }).map((_, index) => (
                   <Suggestion

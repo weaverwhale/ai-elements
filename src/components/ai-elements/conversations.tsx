@@ -45,35 +45,30 @@ export const SearchableConversationDropdown: React.FC<
     if (!triggerRef.current) return;
 
     const rect = triggerRef.current.getBoundingClientRect();
-    const dropdownWidth = 512; // 32rem in pixels
+    const dropdownWidth = dropdownRef.current?.offsetWidth || 320;
     const viewportWidth = window.innerWidth;
+    const margin = 16;
 
-    // Calculate horizontal position (prefer right-aligned but ensure it fits)
-    let left = rect.right - dropdownWidth;
-    if (left < 16) {
-      // 16px minimum margin from edge
-      left = Math.min(rect.left, viewportWidth - dropdownWidth - 16);
-    }
+    let left = rect.left;
 
-    // Check available space above and below
+    left = Math.max(margin, left);
+    left = Math.min(left, viewportWidth - dropdownWidth - margin);
+
     const spaceAbove = rect.top;
-    const minDropdownHeight = 200; // Minimum space needed for dropdown
+    const minDropdownHeight = 200;
 
     let top: number;
     let showAbove: boolean;
 
-    // Prefer positioning above the button
     if (spaceAbove >= minDropdownHeight) {
-      // Position dropdown to start at button top and grow upward
       top = rect.top - 8;
       showAbove = true;
     } else {
-      // Not enough space above, show below
       top = rect.bottom + 8;
       showAbove = false;
     }
 
-    setDropdownPosition({ top, left: Math.max(16, left), showAbove });
+    setDropdownPosition({ top, left, showAbove });
     setIsPositioned(true);
   };
 
@@ -116,8 +111,8 @@ export const SearchableConversationDropdown: React.FC<
   useEffect(() => {
     if (isOpen) {
       calculatePosition();
-      // Small delay to ensure DOM is ready
       setTimeout(() => {
+        calculatePosition();
         if (inputRef.current) {
           inputRef.current.focus();
         }

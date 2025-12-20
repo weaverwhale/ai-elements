@@ -4,12 +4,12 @@ A multi-tool agentic chatbot built with React and the AI SDK
 
 ## Technologies Used
 
-- Vite
-- TypeScript
-- Express
-- React
-- AI SDK
-- AI Elements
+- [Vite](https://vite.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Express](https://expressjs.com/)
+- [React](https://react.dev/blog/2024/12/05/react-19)
+- [AI SDK](https://ai-sdk.dev/)
+- [AI Elements](https://ai-sdk.dev/elements)
 
 ## Getting Started
 
@@ -42,14 +42,16 @@ This will start both the frontend and backend servers using concurrently.
 
 ![Main Chat Input](public/screenshots/ss1.png)
 
----
-
-![Conversation + Tool Calls](public/screenshots/ss2.png)
+![Main Model Options](public/screenshots/ss2.png)
 
 ---
 
-![Request Generative UI](public/screenshots/ss3.png)
+![Conversation + Tool Calls](public/screenshots/ss3.png)
 
 ---
 
-![Generative UI Output Page](public/screenshots/ss4.png)
+![Request Generative UI](public/screenshots/ss4.png)
+
+---
+
+![Generative UI Output Page](public/screenshots/ss5.png)
